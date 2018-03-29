@@ -1,0 +1,377 @@
+# Set up a linux computer with a VPN.
+# Using a VPN tunnel, set up web-based VNC, Plex and SSH forwarding.
+
+cloudnode = central node, cloud hosted linux server with static IP
+homenode = secondary node, ubuntu 16.04
+
+# References
+https://jordancrawford.kiwi/home-server-without-portforward/
+https://technet.microsoft.com/en-us/library/cc779919(v=ws.10).aspx
+http://novnc.com/info.html
+https://chadderstech.wordpress.com/2015/09/08/tinc-on-mac-os-x/
+http://www.binarytides.com/install-nvidia-drivers-ubuntu-14-04/ 
+
+# Set up
+ssh babraham@babraham-Vostro-260
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get -y install openssh-server vim git cmake build-essential python-pip lshw
+sudo service ssh status
+sudo vi /etc/ssh/sshd_config
+sudo passwd root
+    verylongpasswdyoucannotsee
+passwd
+    verylongpasswdyoucannotsee
+mkdir ~/.ssh
+chmod 700 ~/.ssh
+vi ~/.ssh/authorized_keys
+    paste in public key from computer you want to ssh from
+chmod 400 ~/.ssh/authorized_keys
+#chown -R babraham:babraham ~
+
+ssh-keygen -t rsa -C "babraham42@gmail.com"
+cat .ssh/id_rsa.pub
+## copy into github account
+sudo chmod 600 ~/.ssh/id_rsa
+
+# VPN
+## Port forwarding: sign into router (192.168.50.1), WAN >> Port Forwarding
+service name = homevpn
+source target = cloud_public_IP
+port range = 655
+local IP: babraham-Vostro-260 (computer name)
+local port: 655
+protocol: TCP
+
+## cloudnode set up
+ssh babraham@cloud_public_IP
+sudo apt-get update
+sudo apt-get install -y tinc
+sudo mkdir -p /etc/tinc/homenet/hosts
+sudo vi /etc/tinc/homenet/tinc.conf
+```
+Name = cloudnode
+AddressFamily = ipv4
+Interface = tun0
+```
+sudo vi /etc/tinc/homenet/hosts/cloudnode
+```
+Address = cloud_public_IP
+Subnet = 10.0.0.1/32
+```
+sudo tincd -n homenet -K4096
+sudo vi /etc/tinc/homenet/tinc-up
+```
+#!/bin/sh
+ifconfig $INTERFACE 10.0.0.1 netmask 255.255.255.0
+```
+sudo vi /etc/tinc/homenet/tinc-down
+```
+#!/bin/sh
+ifconfig $INTERFACE down
+```
+sudo chmod 755 /etc/tinc/homenet/tinc-*
+
+## homenode set up
+ssh babraham@babraham-Vostro-260
+sudo apt-get install -y tinc
+sudo mkdir -p /etc/tinc/homenet/hosts
+sudo vi /etc/tinc/homenet/tinc.conf
+```
+Name = homenode
+AddressFamily = ipv4
+Interface = tun0
+ConnectTo = cloudnode
+```
+sudo vi /etc/tinc/homenet/hosts/homenode
+```
+Subnet = 10.0.0.2/32
+```
+sudo tincd -n homenet -K4096
+sudo vi /etc/tinc/homenet/tinc-up
+```
+ifconfig $INTERFACE 10.0.0.2 netmask 255.255.255.0
+```
+sudo vi /etc/tinc/homenet/tinc-down
+```
+ifconfig $INTERFACE down
+```
+sudo chmod 755 /etc/tinc/homenet/tinc-*
+scp /etc/tinc/homenet/hosts/homenode babraham@cloud_public_IP:/etc/tinc/homenet/hosts
+scp babraham@cloud_public_IP:/etc/tinc/homenet/hosts/cloudnode /etc/tinc/homenet/hosts
+
+## on ALL machines
+sudo tincd -n homenet -D -d3
+ping 10.0.0.1
+sudo vi /etc/tinc/nets.boot
+```
+homenet
+```
+sudo service tinc start
+
+# VNC
+ssh babraham@babraham-Vostro-260
+sudo apt-get install -y tightvncserver
+#sudo apt-get install -y xfce4 xfce4-goodies
+sudo apt-get install -y gnome-panel gnome-settings-daemon metacity nautilus gnome-terminal
+mkdir ~/.vnc
+vi ~/.vnc/xstartup
+```
+#!/bin/sh
+xrdb $HOME/.Xresources
+xsetroot -solid grey
+#xfce
+startxfce4 &
+```
+sudo chmod 755 ~/.vnc/xstartup
+tightvncserver
+tightvncserver -kill :1
+
+ssh babraham@cloud_public_IP
+git clone https://github.com/novnc/noVNC.git
+mv noVNC novnc
+cd novnc
+cp vnc.html index.html
+cd ..
+git clone https://github.com/novnc/websockify.git
+cd websockify
+sudo apt-get install -y python-numpy
+sudo python setup.py install
+./run -D 6080 10.0.0.2:5901
+
+# PLEX
+ssh babraham@babraham-Vostro-260
+echo deb https://downloads.plex.tv/repo/deb/ public main | sudo tee /etc/apt/sources.list.d/plexmediaserver.list
+curl https://downloads.plex.tv/plex-keys/PlexSign.key | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install -y avahi-daemon plexmediaserver
+sudo vi /etc/systemd/system/plexmediaserver.service
+```
+[Unit]
+Description=Plex Media Server for Linux
+After=network.target
+
+[Service]
+Environment="PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR=/var/lib/plexmediaserver/Library/Application Support"
+Environment=PLEX_MEDIA_SERVER_HOME=/usr/lib/plexmediaserver
+Environment=PLEX_MEDIA_SERVER_MAX_PLUGIN_PROCS=6
+Environment=PLEX_MEDIA_SERVER_TMPDIR=/tmp
+Environment=LD_LIBRARY_PATH=/usr/lib/plexmediaserver
+Environment=LC_ALL=en_US.UTF-8
+Environment=LANG=en_US.UTF-8
+ExecStartPre=/bin/sh -c '/usr/bin/test -d "${PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR}" || /bin/mkdir -p "${PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR}"'
+ExecStart=/bin/sh -c '/usr/lib/plexmediaserver/Plex\ Media\ Server'
+Type=simple
+User=plex
+Group=plex
+Restart=on-failure
+RestartSec=5
+StartLimitInterval=60s
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
+```
+sudo chmod 0777 -R /var/lib/plexmediaserver
+sudo chown plex:plex -R /var/lib/plexmediaserver
+sudo systemctl --system daemon-reload
+sudo service plexmediaserver start
+
+## using vnc, open http://127.0.0.1:32400/web and sign into flex account
+## on plex.bereketabraham.com, sign in and make sure you can connect to the server
+## start plex (local) and websockify (cloud) on startup. Check mysocketio as well
+
+# SSH
+sudo vi /etc/apt/sources.list.d/nginx.list
+deb http://nginx.org/packages/mainline/ubuntu/ trusty nginx
+deb-src http://nginx.org/packages/mainline/ubuntu/ trusty nginx
+sudo apt-get update
+sudo apt-get clean
+sudo apt-get purge nginx nginx-common
+sudo apt-get install nginx
+
+# Nginx
+sudo mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.bak
+sudo vi /etc/nginx/conf.d/mysite.conf
+
+```
+# virtual host using mix of IP-, name-, and port-based configuration
+# from the django app, mysite, running on gunicorn
+
+server {
+    listen       80;
+    server_name  www.bereketabraham.com;
+    return       301 http://bereketabraham.com$request_uri;
+}
+
+server {
+    listen       80;
+    server_name  www.xn--fyd5iqc9o.com;
+    return       301 http://xn--fyd5iqc9o.com$request_uri;
+}
+
+server {
+    listen       80;
+    server_name  bereketabraham.com xn--fyd5iqc9o.com;
+
+    access_log  /var/log/nginx/mysite.log;
+    error_log  /var/log/nginx/mysite.error.log;
+
+    location /blog/ {
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-Host $server_name;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_pass http://127.0.0.1:4000;
+    }
+
+    location /vpn/ {
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-Host $server_name;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_pass http://10.0.0.2:80;
+    }
+
+    location /static/admin/ {
+        # this changes depending on your python version
+        root /usr/local/lib/python2.7/dist-packages/django/contrib/admin;
+    }
+
+    location /media/ {
+        root /home/babraham/mysite;
+    }
+
+    location /static/ {
+        root /home/babraham/mysite;
+    }
+
+    location /table/public/ {
+        root /home/babraham/mysocketio;
+    }
+
+    location /gesture/public/ {
+        root /home/babraham/mygesture;
+    }
+
+    location /gesture {
+        proxy_pass http://localhost:8005/;
+    }
+
+    location / {
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-Host $server_name;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_pass http://127.0.0.1:8001;
+    }
+
+    error_page   500 502 503 504  /home/babraham/mysite/static/50x.html;
+}
+
+server {
+    listen 8080;
+    server_name  bereketabraham.com xn--fyd5iqc9o.com;
+
+    access_log  /var/log/nginx/mysocketio.log;
+    error_log  /var/log/nginx/mysocketio.error.log;
+
+    location / {
+        proxy_pass http://localhost:8002;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+    }
+}
+
+upstream plex-upstream {
+    server 10.0.0.2:32400;
+}
+
+server {
+    listen 80;
+    server_name plex.bereketabraham.com;
+
+    access_log  /var/log/nginx/myplex.log;
+    error_log  /var/log/nginx/myplex.error.log;
+
+    location / {
+        # if a request to / comes in, 301 redirect to the main plex page.
+        # but only if it doesn't contain the X-Plex-Device-Name header
+        # fixes a permissions bug when accessing the web dashboard
+        if ($http_x_plex_device_name = '') {
+            rewrite ^/$ http://$http_host/web/index.html;
+        }
+
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_redirect off;
+        proxy_set_header Host $http_host;
+        proxy_pass http://plex-upstream;
+
+        proxy_buffering off;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 36000s;
+    }
+}
+
+upstream vnc-proxy {
+    server 127.0.0.1:6080;
+}
+
+server {
+    listen 80;
+    server_name vnc.bereketabraham.com;
+
+    location /websockify {
+        proxy_http_version 1.1;
+        proxy_pass http://vnc-proxy/;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # VNC connection timeout
+        proxy_read_timeout 61s;
+        # Disable cache
+        proxy_buffering off;
+    }
+
+    location / {
+        root /home/babraham/novnc;
+    }
+}
+
+
+sudo vi /etc/nginx/nginx.conf
+ssh babraham@bereketabraham.com -p 6090
+
+
+stream {
+    upstream ssh {
+        server 10.0.0.2:22;
+    }
+
+    server {
+        listen 6090;
+        proxy_pass ssh;
+    }
+}
+```
+
+# Alternative ~/.vnc/xstartup
+```
+#!/bin/sh
+export XKL_XMODMAP_DISABLE=1
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+[ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
+[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+xsetroot -solid grey
+vncconfig -iconic &
+gnome-panel &
+gnome-settings-daemon &
+metacity &
+nautilus &
+gnome-terminal &
+```

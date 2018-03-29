@@ -1,0 +1,71 @@
+# Install Tesseract OCR and related programs on a linux computer.
+
+# References
+https://github.com/tesseract-ocr/tesseract/wiki
+
+# Tesseract
+sudo apt-get install -y gcc g++ autoconf automake libtool checkinstall libpng-dev libjpeg-dev libtiff-dev zlib1g-dev
+
+sudo add-apt-repository ppa:alex-p/tesseract-ocr
+sudo apt-get update
+sudo apt-get install -y tesseract-ocr tesseract-ocr-tir tesseract-ocr-amh
+## files in /usr/bin /usr/share/tesseract-ocr/tessdata
+sudo apt-get install -y alien
+wget http://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/t/tesseract-langpack-tir-3.04.00-3.el7.noarch.rpm
+alien tesseract-langpack-tir-3.04.00-3.el7.noarch.rpm
+sudo dpkg -i tesseract-langpack-tir-3.04.00-3.el7.noarch.deb
+sudo apt-get install -f
+
+tesseract myscan.png out -l tir
+tesseract myscan.png out -l eng+tir
+
+sudo apt-get -y install python-pip
+sudo pip install pytesseract
+
+# Tesseract4Java
+wget https://github.com/tesseract4java/tesseract4java/releases/download/v0.1.0/tesseract4java-0.1.0-linux-x86_64.jar
+java -jar tesseract4java-0.1.0-linux-x86_64.jar
+
+# VietOCR
+## support scanning
+sudo apt-get install -y libsane sane sane-utils libsane-extras xsane ghostscript
+## spell checking
+sudo apt-get install -y hunspell hunspell-en-us
+wget https://downloads.sourceforge.net/project/vietocr/vietocr/4.6.3/VietOCR-4.6.3.zip
+unzip VietOCR-4.6.3.zip
+cd VietOCR3
+java -jar VietOCR.jar
+
+# Fonts
+## stored here: /usr/lib/share/fonts /usr/share/fonts
+## download: https://github.com/geezorg/fonts/tree/master/ttf
+scp *.ttf babraham@babraham-Vostro-260:/home/babraham
+## Mac: cp *.ttf ~/Library/Fonts
+sudo mkdir /usr/local/share/fonts/tir_fonts
+sudo mv *.ttf /usr/local/share/fonts/tir_fonts/
+sudo chown root /usr/local/share/fonts/tir_fonts/*.ttf
+sudo fc-cache -fv
+## list all fonts
+fc-list | grep tir_fonts
+text2image --fonts_dir /usr/share/fonts --list_available_fonts
+## xheights
+git clone http://ancientgreekocr.org/grctraining.git
+cd grctraining
+make tools/xheight
+tools/xheight "Ethiopic WashRa SemiBold"
+cd ~
+python process_fonts.py
+
+# Training and evaluation
+git clone https://ancientgreekocr.org/ocr-evaluation-tools.git
+sudo apt-get install -y libicu-dev libpango1.0-dev libcairo2-dev
+cd ocr-evaluation-tools
+make
+sudo make install
+cd ~
+## pdf builder
+sudo apt-get install -y build-essential libfreetype6-dev python-dev python-imaging
+pip install reportlab
+
+
+

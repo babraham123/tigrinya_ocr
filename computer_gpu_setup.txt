@@ -1,0 +1,87 @@
+# basic Machine Learning setup
+# assumes Ubuntu 16.04
+
+# References
+https://www.tensorflow.org/install/install_linux
+http://docs.nvidia.com/cuda/cuda-installation-guide-linux/#axzz4VZnqTJ2A
+
+# NVIDIA Graphics Driver
+## Screen Sharing: babraham-Vostro-260.local:5901
+sudo lshw -C video
+## GeForce 650
+## Get driver version (390.25): http://www.nvidia.com/Download/index.aspx
+sudo service lightdm stop
+sudo apt-get purge nvidia*
+sudo add-apt-repository ppa:graphics-drivers -y
+sudo apt-get update
+sudo apt-get install nvidia-390 -y
+sudo reboot
+lspci -vnn | grep -i VGA -A 12 # check kernel driver
+glxinfo | grep OpenGL | grep renderer # should not be mesa
+lsmod | grep nvidia
+lsmod | grep nouveau
+cat /proc/driver/nvidia/version
+
+## reinstall xorg if it crashes
+sudo service lightdm stop
+sudo apt-get purge xorg-* xserver-xorg -y
+sudo apt-get install xorg xserver-xorg -y
+sudo dpkg-reconfigure xorg
+## determine window manager (mine is gnome)
+ps -A | egrep -i "gnome|kde|mate|cinnamon"
+sudo apt-get purge ubuntu-gnome-desktop gnome-desktop-environment
+sudo apt-get install ubuntu-gnome-desktop
+
+# CUDA
+## Check cuda compatibility: https://developer.nvidia.com/cuda-gpus
+## GeForce 650, compute 3.0 (must build cuda 9.0, binaries require 3.5)
+sudo apt-get purge cuda*
+## check for right kernel version headers
+uname -r
+sudo apt-get install linux-headers-$(uname -r) -y
+wget https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda_9.0.176_384.81_linux-run
+sudo sh cuda_9.0.176_384.81_linux-run
+sudo vi /etc/environment
+## add first line to end of PATH
+```
+:/usr/local/cuda-9.0/bin
+LD_LIBRARY_PATH="/usr/local/cuda-9.0/lib64"
+```
+source /etc/environment
+sudo ldconfig
+sudo apt-get install -y g++ freeglut3-dev build-essential libx11-dev libxmu-dev libxi-dev libglu1-mesa libglu1-mesa-dev
+
+## CUDNN
+## join the developer program: https://developer.nvidia.com/developer-program
+## navigate to and download: https://developer.nvidia.com/rdp/cudnn-download
+tar -xzvf cudnn-9.0-linux-x64-v7.1.tgz
+sudo cp cuda/include/cudnn.h /usr/local/cuda/include
+sudo cp cuda/lib64/libcudnn* /usr/local/cuda/lib64
+sudo chmod a+r /usr/local/cuda/include/cudnn.h /usr/local/cuda/lib64/libcudnn*
+
+## Tensorflow
+sudo apt-get install libcupti-dev
+## add to LD_LIBRARY_PATH
+sudo vi /etc/environment
+## add first line to end of PATH
+```
+:/usr/local/cuda/extras/CUPTI/lib64
+CUDA_HOME="/usr/local/cuda"
+```
+source /etc/environment
+python -V
+## pip3 if python3.n
+sudo apt-get install python-pip python-dev
+#pip install tensorflow-gpu
+sudo pip  install --upgrade https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-1.6.0-cp27-none-linux_x86_64.whl
+## validate
+python
+```
+import tensorflow as tf
+hello = tf.constant('Hello, TensorFlow!')
+sess = tf.Session()
+print(sess.run(hello))
+```
+
+
+
