@@ -2,30 +2,30 @@
 
 # commands to train and run Tesseract OCR
 
-training/boxtrain.sh \
-  --fonts_dir  /mnt/c/Windows/Fonts \
-  --training_text ../langdata/eng/nyd.training_text \
-  --langdata_dir ../langdata \
-  --tessdata_dir ./tessdata \
-  --lang eng  \
-  --exposures "-2 -1 0" \
-  --fontlist "Century Schoolbook" "Dejavu Serif" "Garamond" "Liberation Serif" "Times New Roman," "FreeSerif" "Georgia" \
-  --output_dir ~/tesstutorial/nydlegacy
+combine_lang_model --input_unicharset ~/tigrinya_ocr/tir/Ethiopic.unicharset \
+  --script_dir ~/tigrinya_ocr/tir/ --output_dir ~/training --lang tir \
+  --words ~/tigrinya_ocr/tir/tir.wordlist --puncs ~/tigrinya_ocr/tir/tir.punc --numbers ~/tigrinya_ocr/tir/tir.numbers \
+  --version_str 0.0.1
 
-training/boxtrain.sh \
-  --fonts_dir  /mnt/c/Windows/Fonts \
-  --training_text ../langdata/eng/nyd.training_text \
-  --langdata_dir ../langdata \
-  --tessdata_dir ./tessdata \
-  --lang eng \
-  --linedata_only \
-  --noextract_font_properties \
-  --exposures "-2 -1" \
-  --fontlist "Bookman Old Style Semi-Light"  \
-  --output_dir ~/tesstutorial/nyd
-  
-combine_tessdata -e ../tessdata/eng.traineddata \
-   ~/tesstutorial/eng_from_nyd/eng.lstm
+tesseract ~/tigrinya_ocr/eval/tir_testdata.pdf ~/tigrinya_ocr/eval/tir_init_output \
+  -l tir --oem 1 --tessdata-dir ~/tigrinya_ocr/tir/tir_best.traineddata --psm 3
+
+uni2asc < ~/tigrinya_ocr/eval/tir_init_output.txt > ~/training/init_output_ascii.txt
+uni2asc < ~/tigrinya_ocr/eval/tir_groundtruth.txt > ~/training/groundtruth_ascii.txt
+accuracy ~/tigrinya_ocr/eval/tir_groundtruth.txt ~/tigrinya_ocr/eval/tir_init_output.txt
+
+lstmtraining --model_output /path/to/output [--max_image_MB 6000] \
+  --continue_from /path/to/existing/model \
+  --traineddata /path/to/original/traineddata \
+  [--perfect_sample_delay 0] [--debug_interval 0] \
+  [--max_iterations 0] [--target_error_rate 0.01] \
+  --train_listfile /path/to/list/of/filenames.txt
+
+lstmeval --model ~/training/impact_checkpoint \
+  --traineddata ~/tigrinya_ocr/tir/tir_best.traineddata \
+  --eval_listfile ~/tesstutorial/engeval/eng.training_files.txt
+
+
 
 lstmtraining  \
    -U ~/tesstutorial/nyd/eng.unicharset \
