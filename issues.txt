@@ -1,7 +1,25 @@
 
-Error opening data file /home/babraham/tigrinya_ocr/tir/tir_best.traineddata/tir.traineddata
-Please make sure the TESSDATA_PREFIX environment variable is set to your "tessdata" directory.
-Failed loading language 'tir'
-Tesseract couldn't load any languages!
-Could not initialize tesseract.
-
+combine_lang_model --input_unicharset ~/tigrinya_ocr/tir/Ethiopic.unicharset \
+>   --script_dir ~/tigrinya_ocr/tir --output_dir ~/tigrinya_ocr/training --lang tir \
+>   --words ~/tigrinya_ocr/tir/tir.wordlist --puncs ~/tigrinya_ocr/tir/tir.punc --numbers ~/tigrinya_ocr/tir/tir.numbers \
+>   --version_str 0.0.1
+Loaded unicharset of size 1462 from file /home/babraham/tigrinya_ocr/tir/Ethiopic.unicharset
+Setting unichar properties
+Other case Μ of µ is not in unicharset
+Mirror ⧵ of ∕ is not in unicharset
+Mirror ⦸ of ⊘ is not in unicharset
+Mirror ⫞ of ⊦ is not in unicharset
+Mirror ⫣ of ⊩ is not in unicharset
+Mirror ⫥ of ⊫ is not in unicharset
+Setting script properties
+Failed to load script unicharset from:/home/babraham/tigrinya_ocr/tir/Inherited.unicharset
+Failed to load script unicharset from:/home/babraham/tigrinya_ocr/tir/Devanagari.unicharset
+Warning: properties incomplete for index 559 = ̋
+Warning: properties incomplete for index 560 = ̏
+Warning: properties incomplete for index 561 = ̴
+Warning: properties incomplete for index 562 = ͠
+Warning: properties incomplete for index 563 = ͡
+Config file is optional, continuing...
+Failed to read data from: /home/babraham/tigrinya_ocr/tir/tir/tir.config
+Failed to read data from: /home/babraham/tigrinya_ocr/tir/radical-stroke.txt
+Error reading radical code table /home/babraham/tigrinya_ocr/tir/radical-stroke.txt

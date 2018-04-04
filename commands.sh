@@ -12,18 +12,19 @@ do
   -l tir --oem 1 --tessdata-dir ~/tigrinya_ocr/tessdata/best --psm 3
 done
 
+uni2asc < ~/tigrinya_ocr/tessdata/best/tir_eval-00.txt > ~/tigrinya_ocr/eval/tir_testdata_ascii-00.txt
+uni2asc < ~/tigrinya_ocr/eval/tir_groundtruth.txt > ~/tigrinya_ocr/eval/tir_groundtruth_ascii.txt
+accuracy ~/tigrinya_ocr/eval/tir_groundtruth.txt ~/tigrinya_ocr/tessdata/best/tir_eval-00.txt
+accuracy ~/tigrinya_ocr/eval/tir_groundtruth_ascii.txt ~/tigrinya_ocr/eval/tir_testdata_ascii-00.txt
 
 combine_lang_model --input_unicharset ~/tigrinya_ocr/tir/Ethiopic.unicharset \
-  --script_dir ~/tigrinya_ocr/tir/ --output_dir ~/training --lang tir \
+  --script_dir ~/tigrinya_ocr/tir --output_dir ~/tigrinya_ocr/training --lang tir \
   --words ~/tigrinya_ocr/tir/tir.wordlist --puncs ~/tigrinya_ocr/tir/tir.punc --numbers ~/tigrinya_ocr/tir/tir.numbers \
   --version_str 0.0.1
 
 tesseract ~/tigrinya_ocr/eval/tir_testdata.pdf ~/tigrinya_ocr/eval/tir_init_output \
   -l tir --oem 1 --tessdata-dir ~/tigrinya_ocr/tir/tir_best.traineddata --psm 3
 
-uni2asc < ~/tigrinya_ocr/eval/tir_init_output.txt > ~/training/init_output_ascii.txt
-uni2asc < ~/tigrinya_ocr/eval/tir_groundtruth.txt > ~/training/groundtruth_ascii.txt
-accuracy ~/tigrinya_ocr/eval/tir_groundtruth.txt ~/tigrinya_ocr/eval/tir_init_output.txt
 
 lstmtraining --model_output /path/to/output [--max_image_MB 6000] \
   --continue_from /path/to/existing/model \
