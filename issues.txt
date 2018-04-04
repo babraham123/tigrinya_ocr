@@ -1,0 +1,7 @@
+
+Error opening data file /home/babraham/tigrinya_ocr/tir/tir_best.traineddata/tir.traineddata
+Please make sure the TESSDATA_PREFIX environment variable is set to your "tessdata" directory.
+Failed loading language 'tir'
+Tesseract couldn't load any languages!
+Could not initialize tesseract.
+

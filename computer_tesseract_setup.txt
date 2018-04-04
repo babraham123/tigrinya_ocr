@@ -4,17 +4,14 @@
 https://github.com/tesseract-ocr/tesseract/wiki
 
 # Tesseract
-sudo apt-get install -y gcc g++ autoconf automake libtool checkinstall libpng-dev libjpeg-dev libtiff-dev zlib1g-dev
+sudo apt-get install -y gcc g++ autoconf automake libtool checkinstall libpng-dev libjpeg-dev libtiff-dev zlib1g-dev libleptonica-dev
 
 sudo add-apt-repository ppa:alex-p/tesseract-ocr
 sudo apt-get update
 sudo apt-get install -y tesseract-ocr tesseract-ocr-tir tesseract-ocr-amh
-## files in /usr/bin /usr/share/tesseract-ocr/tessdata
-sudo apt-get install -y alien
-wget http://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/t/tesseract-langpack-tir-3.04.00-3.el7.noarch.rpm
-alien tesseract-langpack-tir-3.04.00-3.el7.noarch.rpm
-sudo dpkg -i tesseract-langpack-tir-3.04.00-3.el7.noarch.deb
-sudo apt-get install -f
+## debug installation
+tesseract -v
+ldd /usr/bin/tesseract
 
 tesseract myscan.png out -l tir
 tesseract myscan.png out -l eng+tir

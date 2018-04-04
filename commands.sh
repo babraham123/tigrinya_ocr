@@ -2,6 +2,9 @@
 
 # commands to train and run Tesseract OCR
 
+tesseract ~/tigrinya_ocr/eval/tir_testdata.pdf ~/tigrinya_ocr/tessdata/fast \
+  -l tir --oem 1 --tessdata-dir ~/tigrinya_ocr/tessdata/fast --psm 3
+
 combine_lang_model --input_unicharset ~/tigrinya_ocr/tir/Ethiopic.unicharset \
   --script_dir ~/tigrinya_ocr/tir/ --output_dir ~/training --lang tir \
   --words ~/tigrinya_ocr/tir/tir.wordlist --puncs ~/tigrinya_ocr/tir/tir.punc --numbers ~/tigrinya_ocr/tir/tir.numbers \
