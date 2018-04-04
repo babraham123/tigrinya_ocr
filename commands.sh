@@ -2,8 +2,16 @@
 
 # commands to train and run Tesseract OCR
 
-tesseract ~/tigrinya_ocr/eval/tir_testdata.pdf ~/tigrinya_ocr/tessdata/fast \
-  -l tir --oem 1 --tessdata-dir ~/tigrinya_ocr/tessdata/fast --psm 3
+convert -density 300 tir_testdata.pdf -depth 8 -background white \
+  -flatten +matte tir_testdata-%02d.tiff
+
+# fast int best
+for i in {00..18}
+do
+  tesseract ~/tigrinya_ocr/eval/tir_testdata-$i.tiff ~/tigrinya_ocr/tessdata/best/tir_eval-$i \
+  -l tir --oem 1 --tessdata-dir ~/tigrinya_ocr/tessdata/best --psm 3
+done
+
 
 combine_lang_model --input_unicharset ~/tigrinya_ocr/tir/Ethiopic.unicharset \
   --script_dir ~/tigrinya_ocr/tir/ --output_dir ~/training --lang tir \
