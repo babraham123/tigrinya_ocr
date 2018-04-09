@@ -22,10 +22,6 @@ combine_lang_model --input_unicharset ~/tigrinya_ocr/tir/Ethiopic.unicharset \
   --words ~/tigrinya_ocr/tir/tir.wordlist --puncs ~/tigrinya_ocr/tir/tir.punc --numbers ~/tigrinya_ocr/tir/tir.numbers \
   --version_str 0.0.1
 
-tesseract ~/tigrinya_ocr/eval/tir_testdata.pdf ~/tigrinya_ocr/eval/tir_init_output \
-  -l tir --oem 1 --tessdata-dir ~/tigrinya_ocr/tir/tir_best.traineddata --psm 3
-
-
 lstmtraining --model_output /path/to/output [--max_image_MB 6000] \
   --continue_from /path/to/existing/model \
   --traineddata /path/to/original/traineddata \
@@ -36,6 +32,10 @@ lstmtraining --model_output /path/to/output [--max_image_MB 6000] \
 lstmeval --model ~/training/impact_checkpoint \
   --traineddata ~/tigrinya_ocr/tir/tir_best.traineddata \
   --eval_listfile ~/tesstutorial/engeval/eng.training_files.txt
+
+
+export TESSDATA_PREFIX=/home/babraham/tigrinya_ocr/tessdata/best
+java -jar VietOCR.jar
 
 
 

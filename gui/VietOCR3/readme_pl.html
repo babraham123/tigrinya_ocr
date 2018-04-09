@@ -16,7 +16,7 @@ Program posiada mechanizm przetwarzania wtórnego, który pomaga poprawiać bł�
         <p><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Java Runtime Environment 8</a>
 lub wyższą wersję.</p>
         <h3>INSTALACJA</h3>
-        <p>Pliki wykonywalne Tesseract 3.05.01 dla Windows są w zestawie z programem. Dodatkowe <a href="https://github.com/tesseract-ocr/tessdata">pakiety językowe</a> dla Tesseract, których nazwy zaczynają się kodem ISO639-3, powinny być umieszczone w katalogu <code>tessdata</code>.</p>
+        <p>Pliki wykonywalne Tesseract dla Windows są w zestawie z programem. Dodatkowe <a href="https://github.com/tesseract-ocr/tessdata">pakiety językowe</a> dla Tesseract, których nazwy zaczynają się kodem ISO639-3, powinny być umieszczone w katalogu <code>tessdata</code>.</p>
         <p>Dla Linuksa, Tesseract i jego pakiety językowe są w Graficznym (ogólnodostępnym) repozytorium. Mogą być zainstalowane przy użyciu Menedżera pakietów Synaptic lub poniższego polecenia:</p>
         <blockquote>
             <p><code>sudo apt-get install tesseract-ocr tesseract-ocr-eng tesseract-ocr-pol</code></p>
@@ -29,22 +29,13 @@ lub wyższą wersję.</p>
         <p>VietOCR również umożliwia ściąganie i instalowanie wybranych pakietów językowych poprzez element menu <em>Pobierz pakiet językowy</em>. W zależności od lokalizacji folderu <code>tessdata</code> może będzie wymagane uruchomienie programu jako root albo admin 
 by było możliwe zainstalowanie ściągniętych danych do folderu, zwłaszcza jeśli jest to wewnątrz katalogu systemowego takiego jak <code>/usr</code> w Linuksie lub <code>C:\Program Files</code> w Windows.</p>
         <p>Skanowanie na platformie Windows jest wspierane przez bibliotekę Windows Image
-Acquisition Library v2.0, która wymaga Windows XP Service Pack 1 (SP1) lub nowszego. Biblioteka ta stała się standardem począwszy od Windows Vista i 7. By zainstalować Bibliotekę WIA Library na Windows XP, skopiuj plik <code>wiaaut.dll</code> do katalogu <code>System32</code> (zwykle umiejscowionego w <code>C:\Windows\System32</code>) i uruchom następujące polecenie z linii poleceń:</p>
-        <blockquote>
-            <p><code>regsvr32 C:\Windows\System32\wiaaut.dll</code></p>
-        </blockquote>
+Acquisition Library v2.0.</p>
         <p>W systemie Linux, skanowanie wymaga instalacji pakietów SANE</p>
         <blockquote>
             <p><code>sudo apt-get install libsane sane sane-utils libsane-extras xsane</code></p>
         </blockquote>
         <p>Obsługa plików PDF jest możliwa dzięki <a href="http://www.ghostscript.com/">GPL
-                Ghostscript</a>. Po zainstalowaniu bibliotek upewnij się, że udostępnione biblioteki (<code>gsdll32.dll</code> or <code>libgs.so</code>) &nbsp;są w ścieżce wyszukiwania poprzez ustawienie odpowiednich zmiennych systemowych. W Windows dla GS w wersji 9.21, dodaj poniższy wpis do&nbsp;zmiennej&nbsp;<code>Path</code>&nbsp;(dostępnej poprzez Panel Kontrolny &gt; System &gt; zakładka Zaawansowane &gt; Zmienne środowiskowe...) :</p>
-        <blockquote>
-            <p><code>;C:\Program Files\gs\gs9.21\bin</code></p>
-        </blockquote>W systemie Linux: <blockquote>
-            <p><code>export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib</code></p>
-        </blockquote>
-        <p>gdzie w&nbsp;<code>/usr/lib&nbsp;</code>jest zlokalizowany link&nbsp;<code>libgs.so</code>&nbsp;do <code>libgs.so.9.21</code>.</p>
+                Ghostscript</a>.</p>
         <p>Funkcjonalność sprawdzania pisowni jest dostępna poprzez Hunspell, którego pliki <a href="http://wiki.services.openoffice.org/wiki/Dictionaries">słownika (</a><code>.aff</code> <code>.dic</code>) powinny być umieszczone w folderze <code>dict</code> programu VietOCR. <code>user.dic</code> jest plikiem z kodowaniem UTF-8, który zawiera listę słów, po jednym słowie na linię.</p>
         <p>W systemie Linux, Hunspell wraz ze słownikami może być zainstalowany za pomocą Menedżera pakietów Synaptic lub polecenia&nbsp;<code>apt</code>, jak poniżej:</p>
         <blockquote><code>sudo apt-get install hunspell hunspell-en-us</code></blockquote>
