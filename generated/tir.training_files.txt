@@ -1,0 +1,2 @@
+/home/babraham/tigrinya_ocr/generated/tir.Abyssinica_SIL.exp0.lstmf
+/home/babraham/tigrinya_ocr/generated/tir.Ethiopia_Jiret.exp0.lstmf
