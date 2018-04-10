@@ -8,7 +8,7 @@ sudo apt-get install -y gcc g++ autoconf automake libtool checkinstall libpng-de
 
 sudo add-apt-repository ppa:alex-p/tesseract-ocr
 sudo apt-get update
-sudo apt-get install -y tesseract-ocr tesseract-ocr-tir tesseract-ocr-amh
+sudo apt-get install -y tesseract-ocr libtesseract-dev tesseract-ocr-tir tesseract-ocr-amh
 ## debug installation
 tesseract -v
 ldd /usr/bin/tesseract
