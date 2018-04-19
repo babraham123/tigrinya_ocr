@@ -1,4 +1,11 @@
+Issues::
+1. tesstrain.sh: can't generate tif/box files for certain fonts in combination. However, when separate it seems to work.
+2. lstmeval: fails to encode transcription for a bunch of valid lines
+Eval Char error rate=1.9199812, Word error rate=4.7033258
+3. Is tir.config needed? 
 
+
+1.
 Please correct --font arg.
 ERROR: /tmp/tmp.1qYty2A18l/tir/tir.Ethiopic_WashRa_SemiBoldEthiopic_Yigezu_Bisrat_GothicEthiopic_TintCode2003Ethiopic_YebseEthiopic_ZelanEthiopic_WookianosAbyssinica_SILAbyssinica_SIL_ZaimaGF_Zemen_UnicodeAbyssinica_SIL_SebatbeitEthiopic_FantuwuaEthiopic_Yigezu_Bisrat_GofferEthiopia_JiretEthiopic_WashRa_BoldEthiopic_HiwuaAbyssinica_SIL_Ximtanga.exp0.box does not exist or is not readable
 ERROR: /tmp/tmp.1qYty2A18l/tir/tir.Ethiopic_WashRa_SemiBoldEthiopic_Yigezu_Bisrat_GothicEthiopic_TintCode2003Ethiopic_YebseEthiopic_ZelanEthiopic_WookianosAbyssinica_SILAbyssinica_SIL_ZaimaGF_Zemen_UnicodeAbyssinica_SIL_SebatbeitEthiopic_FantuwuaEthiopic_Yigezu_Bisrat_GofferEthiopia_JiretEthiopic_WashRa_BoldEthiopic_HiwuaAbyssinica_SIL_Ximtanga.exp0.box does not exist or is not readable
