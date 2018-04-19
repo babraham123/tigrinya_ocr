@@ -17,12 +17,13 @@ def sendCmd(cmd):
 
 
 def main():
-    fonts = sendCmd('fc-list').split('\n')
+    # fonts = sendCmd('fc-list').split('\n')
+    fonts = sendCmd('text2image --list_available_fonts --fonts_dir /usr/local/share/fonts/tir_fonts').split('\n')
 
     xheight_tool = '~/grctraining/tools/xheight'
     xheights = []
     for font in fonts:
-        if font and 'tir_fonts' in font:
+        if font: # and 'tir_fonts' in font:
             font = font.strip().split(':')[1][1:]
             xheights.append(sendCmd(xheight_tool + ' "' + font + '"'))
 
