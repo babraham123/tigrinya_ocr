@@ -4,11 +4,21 @@
 https://github.com/tesseract-ocr/tesseract/wiki
 
 # Tesseract
-sudo apt-get install -y gcc g++ autoconf automake libtool checkinstall libpng-dev libjpeg-dev libtiff-dev zlib1g-dev libleptonica-dev
+sudo apt-get install -y gcc g++ autoconf automake libtool checkinstall libpng-dev libjpeg-dev libtiff-dev zlib1g-dev libleptonica-dev pandoc git python-pip vim
 
+# if ubuntu
 sudo add-apt-repository ppa:alex-p/tesseract-ocr
+# if debian
+sudo apt-get install -y dirmngr build-essential libfontconfig1 libicu55 liblept5
+sudo vi /etc/apt/sources.list.d/alex-p-tesseract-ocr.list
+```
+deb http://ppa.launchpad.net/alex-p/tesseract-ocr/ubuntu xenial main 
+deb-src http://ppa.launchpad.net/alex-p/tesseract-ocr/ubuntu xenial main 
+```
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8529B1E0F8BF7F65C12FABB0A4BCBD87CEF9E52D
+
 sudo apt-get update
-sudo apt-get install -y tesseract-ocr libtesseract-dev tesseract-ocr-tir tesseract-ocr-amh
+sudo apt-get install -y libtesseract4 tesseract-ocr libtesseract-dev tesseract-ocr-tir tesseract-ocr-amh tesseract-ocr-eng
 ## debug installation
 tesseract -v
 ldd /usr/bin/tesseract

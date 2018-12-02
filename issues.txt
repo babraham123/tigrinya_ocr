@@ -9,3 +9,19 @@ Eval Char error rate=1.9199812, Word error rate=4.7033258
 Please correct --font arg.
 ERROR: /tmp/tmp.1qYty2A18l/tir/tir.Ethiopic_WashRa_SemiBoldEthiopic_Yigezu_Bisrat_GothicEthiopic_TintCode2003Ethiopic_YebseEthiopic_ZelanEthiopic_WookianosAbyssinica_SILAbyssinica_SIL_ZaimaGF_Zemen_UnicodeAbyssinica_SIL_SebatbeitEthiopic_FantuwuaEthiopic_Yigezu_Bisrat_GofferEthiopia_JiretEthiopic_WashRa_BoldEthiopic_HiwuaAbyssinica_SIL_Ximtanga.exp0.box does not exist or is not readable
 ERROR: /tmp/tmp.1qYty2A18l/tir/tir.Ethiopic_WashRa_SemiBoldEthiopic_Yigezu_Bisrat_GothicEthiopic_TintCode2003Ethiopic_YebseEthiopic_ZelanEthiopic_WookianosAbyssinica_SILAbyssinica_SIL_ZaimaGF_Zemen_UnicodeAbyssinica_SIL_SebatbeitEthiopic_FantuwuaEthiopic_Yigezu_Bisrat_GofferEthiopia_JiretEthiopic_WashRa_BoldEthiopic_HiwuaAbyssinica_SIL_Ximtanga.exp0.box does not exist or is not readable
+
+
+ssh babraham@192.168.50.59
+vncserver
+Screen Share
+vnc://192.168.50.59:5901
+
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+country=US
+update_config=1
+
+network={
+    ssid="Home Wifi"
+    psk="mypassword"
+}
+
