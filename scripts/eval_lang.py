@@ -3,7 +3,8 @@
 
 # python script to create Tigrinya PDFs from the corpus
 
-# pip install reportlab pypandoc
+# sudo apt-get install pandoc python-pythonmagick
+# pip install reportlab pypandoc pytesseract Pillow
 
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, PageBreak
 from reportlab.lib.styles import ParagraphStyle
@@ -12,7 +13,14 @@ from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.colors import black
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont 
+from reportlab.pdfbase.ttfonts import TTFont
+import pypandoc
+import PythonMagick
+try:
+    from PIL import Image
+except ImportError:
+    import Image
+import pytesseract
 
 filename_in = '../raw_data/corpus.txt'
 filename_out = '../tesseract/eval/tir_testdata.pdf'
@@ -45,6 +53,23 @@ fonts_by_level = {
         'GF Zemen Unicode': 'gfzemenu.ttf'
     },
 }
+
+def pdf_to_tiff(filename):
+    img = PythonMagick.Image()
+    img.density('600')  # you have to set this here if the initial dpi are > 72
+    img.read(filename + '.pdf') # the pdf is rendered at 600 dpi
+    img.write(filename + '.tif')
+
+def run_ocr(lang, filename):
+    # text image to string
+    ocr_output = pytesseract.image_to_string(Image.open(filename + '.tif'), lang=lang)
+    # Get bounding box estimates
+    print(pytesseract.image_to_boxes(Image.open(filename + '.tif'), lang=lang))
+    # Get verbose data including boxes, confidences, line and page numbers
+    print(pytesseract.image_to_data(Image.open(filename + '.tif'), lang=lang))
+    # Get information about orientation and script detection
+    print(pytesseract.image_to_osd(Image.open(filename + '.tif'), lang=lang))
+    return ocr_output
 
 def main():
     for level, fonts in fonts_by_level

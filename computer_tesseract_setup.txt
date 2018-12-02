@@ -4,7 +4,7 @@
 https://github.com/tesseract-ocr/tesseract/wiki
 
 # Tesseract
-sudo apt-get install -y gcc g++ autoconf automake libtool checkinstall libpng-dev libjpeg-dev libtiff-dev zlib1g-dev libleptonica-dev pandoc git python-pip vim
+sudo apt-get install -y gcc g++ autoconf automake libtool checkinstall libpng-dev libjpeg-dev libtiff-dev zlib1g-dev libleptonica-dev git vim
 
 # if ubuntu
 sudo add-apt-repository ppa:alex-p/tesseract-ocr
@@ -26,8 +26,8 @@ ldd /usr/bin/tesseract
 tesseract myscan.png out -l tir
 tesseract myscan.png out -l eng+tir
 
-sudo apt-get -y install python-pip
-sudo pip install pytesseract
+sudo apt-get -y install python-pip pandoc python-pythonmagick
+sudo pip install pytesseract reportlab pypandoc Pillow
 
 # Tesseract4Java
 wget https://github.com/tesseract4java/tesseract4java/releases/download/v0.1.0/tesseract4java-0.1.0-linux-x86_64.jar
