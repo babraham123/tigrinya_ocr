@@ -31,10 +31,7 @@ def main():
     text = [x.decode('utf-8') for x in text]
     filename = remove_ext(filename_in)
 
-    pdf_file = create_pdf(filename, text, 'Arial')
-    img_file = pdf_to_tif(remove_ext(pdf_file))
-    print_ocr(img_file, 'eng')
-    print('\n')
+    eval_sample(text, 'Arial', 'eng')
 
     eval_all(filename, text, fonts_by_level, langs)
 

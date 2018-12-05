@@ -48,10 +48,7 @@ def main():
     text = [x.decode('utf-8') for x in text]
     filename = remove_ext(filename_in)
 
-    pdf_file = create_pdf(filename, text, 'Abyssinica SIL')
-    img_file = pdf_to_tif(remove_ext(pdf_file))
-    print_ocr(img_file, 'tir')
-    print('\n')
+    eval_sample(text, 'Abyssinica SIL', 'tir')
 
     eval_all(filename, text, fonts_by_level, langs)
 

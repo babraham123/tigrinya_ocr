@@ -28,6 +28,7 @@ lines_per_page = 25
 def pdf_to_tif(filename):
     img = PythonMagick.Image()
     img.density('600')  # you have to set this here if the initial dpi are > 72
+    img.depth(8) # needed to work with Pillow
     img.read(filename + '.pdf') # the pdf is rendered at 600 dpi
     img.write(filename + '.tif')
     return filename + '.tif'
@@ -187,6 +188,14 @@ def mean_stats(stats, lang):
         # mean and variance for the % of correct words and letters
         calcs[level] = [mwords, vwords, mletters, vletters]
     return calcs
+
+def eval_sample(text, font, lang):
+    pdf_file = create_pdf('sample_' + font, text[0:lines_per_page], font)
+    img_file = pdf_to_tif(remove_ext(pdf_file))
+    print_ocr(img_file, lang)
+    print('\n')
+    # os.remove(pdf_file)
+    # os.remove(img_file)
 
 def eval_all(filename, text, fonts_by_level, langs):
     results = []
