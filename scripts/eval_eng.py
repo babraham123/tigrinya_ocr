@@ -12,16 +12,21 @@ langs = ['eng', 'spa', 'fra', 'deu']
 lines_per_page = 25
 
 fonts = {
-    'easy': [
-        'Arial',
-        'Garamond',
-        'Times New Roman',
-        'Trebuchet MS',
-        'Courier New',
-    ],
+    'easy': {
+        'Arial': 'arial.ttf',
+        'Georgia': 'georgia.ttf',
+        'Times New Roman': 'times.ttf',
+        'Trebuchet MS': 'trebuc.ttf',
+        'Verdana': 'verdana.ttf',
+    },
 }
 
 def main():
+    # register all fonts
+    for level, fonts in fonts_by_level:
+        for font_name, font_file in fonts:
+            pdfmetrics.registerFont(TTFont(font_name, font_dir + font_file))
+
     # read corpus
     with open(filename_in) as f:
         text = f.readlines()
