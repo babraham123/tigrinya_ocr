@@ -5,11 +5,8 @@
 
 from evaluate import *
 
-filename_in = '../raw_data/eng_corpus.txt'
-# font_dir = '/Users/babraham/Library/Fonts/'
-font_dir = ''
+filename_in = '/home/babraham/tigrinya_ocr/eval/eng_corpus.txt'
 langs = ['eng', 'spa', 'fra', 'deu']
-lines_per_page = 25
 
 fonts = {
     'easy': {

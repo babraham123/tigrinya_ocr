@@ -5,11 +5,10 @@
 
 from evaluate import *
 
-filename_in = '../raw_data/tir_corpus.txt'
+filename_in = '/home/babraham/tigrinya_ocr/eval/tir_corpus.txt'
 # font_dir = '/Users/babraham/Library/Fonts/'
-font_dir = ''
+font_dir = '/home/babraham/tigrinya_ocr/fonts/'
 langs = ['tir', 'amh']
-lines_per_page = 25
 
 fonts_by_level = {
     'easy': {

@@ -165,7 +165,7 @@ def pick_best(stats):
         if level not in stats:
             continue
         for font in stats[level]:
-            for lang in stats[level][font]
+            for lang in stats[level][font]:
                 picks[lang] += picks.get(lang, 0) + sum(stats[level][font][lang])
     return max(picks, key=picks.get)
 
