@@ -191,15 +191,16 @@ def mean_stats(stats, lang):
 def eval_all(filename, text, fonts_by_level, langs):
     results = []
     for i in range(0, len(text), lines_per_page):
-        results.append(eval_langs(filename, text[i:i+lines_per_page], fonts_by_level, langs))
-    stats = results[0]
-    for j in range(1, len(results)):
-        stats = sum_stats(stats, results[j])
-    stats = calc_stats(stats)
-    print('Full stats: ' + stats)
-    lang = pick_best(stats)
-    print('Best lang: ' + lang)
+        results.append(eval_langs(filename + str(i), text[i:i+lines_per_page], fonts_by_level, langs))
 
-    stats = mean_stats(stats, lang)
-    print('Stats: ' + stats)
+    stats_raw = results[0]
+    for j in range(1, len(results)):
+        stats_raw = sum_stats(stats_raw, results[j])
+
+    stats_full = calc_stats(stats_raw)
+    print('Full stats: ' + stats_full)
+    lang = pick_best(stats_full)
+    print('Best lang: ' + lang)
+    stats = mean_stats(stats_full, lang)
+    print('Stats (mean, variance): ' + stats)
 
