@@ -86,7 +86,7 @@ def create_pdf(filename, text, font):
 def eval_langs(filename, text, fonts_by_level, langs):
     groundtruth = '\n'.join(text)
     results = {}
-    for level, fonts in fonts_by_level:
+    for level, fonts in fonts_by_level.iteritems():
         print('Level: ' + level)
         f_res = {}
         for font in fonts:
@@ -125,7 +125,7 @@ def check_accuracy(truth, output):
         l_out = l_out.split(' ')
         words += len(l_truth)
 
-        for i, w_truth in l_truth:
+        for i, w_truth in enumerate(l_truth):
             letters += len(w_truth)
 
             if i >= len(l_out):
@@ -137,7 +137,7 @@ def check_accuracy(truth, output):
                 correct_letters += len(w_truth)
                 continue
 
-            for j, ll_truth in w_truth:
+            for j, ll_truth in enumerate(w_truth):
                 if j < len(w_out) and ll_truth == w_out[j]:
                     correct_letters += 1
 

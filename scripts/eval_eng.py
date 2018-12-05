@@ -6,9 +6,10 @@
 from evaluate import *
 
 filename_in = '/home/babraham/tigrinya_ocr/eval/eng_corpus.txt'
+font_dir = '/usr/share/fonts/truetype/msttcorefonts/'
 langs = ['eng', 'spa', 'fra', 'deu']
 
-fonts = {
+fonts_by_level = {
     'easy': {
         'Arial': 'arial.ttf',
         'Georgia': 'georgia.ttf',
@@ -20,8 +21,8 @@ fonts = {
 
 def main():
     # register all fonts
-    for level, fonts in fonts_by_level:
-        for font_name, font_file in fonts:
+    for level, fonts in fonts_by_level.iteritems():
+        for font_name, font_file in fonts.iteritems():
             pdfmetrics.registerFont(TTFont(font_name, font_dir + font_file))
 
     # read corpus
