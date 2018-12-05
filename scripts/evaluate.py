@@ -189,12 +189,12 @@ def mean_stats(stats, lang):
         calcs[level] = [mwords, vwords, mletters, vletters]
     return calcs
 
-def eval_sample(text, font, lang):
-    pdf_file = create_pdf('sample_' + font, text[0:lines_per_page], font)
+def eval_sample(filename, text, font, lang):
+    pdf_file = create_pdf(filename + '_sample', text[0:lines_per_page], font)
     img_file = pdf_to_tif(remove_ext(pdf_file))
     print_ocr(img_file, lang)
     print('\n')
-    # os.remove(pdf_file)
+    os.remove(pdf_file)
     # os.remove(img_file)
 
 def eval_all(filename, text, fonts_by_level, langs):

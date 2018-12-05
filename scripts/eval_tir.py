@@ -48,7 +48,7 @@ def main():
     text = [x.decode('utf-8') for x in text]
     filename = remove_ext(filename_in)
 
-    eval_sample(text, 'Abyssinica SIL', 'tir')
+    eval_sample(filename, text, 'Abyssinica SIL', 'tir')
 
     eval_all(filename, text, fonts_by_level, langs)
 
