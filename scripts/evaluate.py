@@ -110,19 +110,23 @@ def eval_langs(filename, text, fonts_by_level, langs):
         results[level] = f_res
     return results
 
-def check_accuracy(truth, output):
+def check_accuracy(truth, output_raw):
     truth = truth.split('\n')
-    output = output.split('\n')
-    if len(truth) != len(output):
-        return 'mismatch in number of lines'
+    output_raw = output_raw.split('\n')
+    output = []
+    for out in output_raw:
+        out = out.strip()
+        if out:
+            output.append(out)
+    del output_raw
 
     correct_words = 0
     words = 0
     correct_letters = 0
     letters = 0
     for l_truth, l_out in zip(truth, output):
-        l_truth = l_truth.split(' ')
-        l_out = l_out.split(' ')
+        l_truth = l_truth.strip().split(' ')
+        l_out = l_out.strip().split(' ')
         words += len(l_truth)
 
         for i, w_truth in enumerate(l_truth):
