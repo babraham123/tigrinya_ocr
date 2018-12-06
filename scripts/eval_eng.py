@@ -31,7 +31,7 @@ def main():
     text = [x.decode('utf-8') for x in text]
     filename = remove_ext(filename_in)
 
-    eval_sample(filename, text, 'Arial', 'eng')
+    # eval_sample(filename, text, 'Arial', 'eng')
 
     eval_all(filename, text, fonts_by_level, langs)
 
