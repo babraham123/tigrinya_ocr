@@ -29,6 +29,8 @@ def pdf_to_tif(filename):
     img = PythonMagick.Image()
     img.density('600')  # you have to set this here if the initial dpi are > 72
     img.depth(8) # needed to work with Pillow
+    img.backgroundColor('white')
+    img.type('GrayScale')
     img.read(filename + '.pdf') # the pdf is rendered at 600 dpi
     img.write(filename + '.tif')
     return filename + '.tif'
