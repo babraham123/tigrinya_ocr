@@ -26,8 +26,8 @@ ldd /usr/bin/tesseract
 tesseract myscan.png out -l tir
 tesseract myscan.png out -l eng+tir
 
-sudo apt-get -y install python-pip pandoc python-pythonmagick ttf-mscorefonts-installer
-sudo pip install pytesseract reportlab pypandoc Pillow
+sudo apt-get -y install python-pip pandoc libmagickwand-dev ttf-mscorefonts-installer
+sudo pip install pytesseract reportlab pypandoc Pillow Wand
 
 sudo vi /etc/ImageMagick/policy.xml
 // change PDF and LABEL policy rights to "read|write"

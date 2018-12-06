@@ -15,26 +15,22 @@ from reportlab.lib.colors import black
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import pypandoc
-import PythonMagick
 import os
-try:
-    from PIL import Image
-except ImportError:
-    import Image
+from PIL import Image
+from wand.image import Image as Img
+from wand.color import Color
 import pytesseract
 
 lines_per_page = 25
 
 def pdf_to_tif(filename):
-    img = PythonMagick.Image()
-    img.density('600')  # you have to set this here if the initial dpi are > 72
-    img.depth(8) # needed to work with Pillow
-    img.magick('Grayscale')
-    img.backgroundColor(PythonMagick.Color('white'))
-    # img.alphaColor(PythonMagick.Color('white'))
-    img.read(filename + '.pdf') # the pdf is rendered at 600 dpi
-    img.write(filename + '.tif')
-    return filename + '.tif'
+    pdf = filename + '.pdf'
+    tif = filename + '.tif'
+    with Img(filename=pdf, resolution=300) as img:
+        img.compression_quality = 99
+        img.type = 'grayscale'
+        img.save(filename=tif)
+    return tif
 
 def print_ocr(filename, lang):
     # text image to string
@@ -198,7 +194,7 @@ def eval_sample(filename, text, font, lang):
     print_ocr(img_file, lang)
     print('\n')
     os.remove(pdf_file)
-    # os.remove(img_file)
+    os.remove(img_file)
 
 def eval_all(filename, text, fonts_by_level, langs):
     results = []
