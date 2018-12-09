@@ -37,7 +37,7 @@ fonts_by_level = {
 }
 
 def main():
-    register_fonts(fonts_by_level)
+    register_fonts(fonts_by_level, font_dir)
 
     # read corpus
     with open(filename_in) as f:
