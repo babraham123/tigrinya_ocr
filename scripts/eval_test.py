@@ -8,6 +8,8 @@ from evaluate import *
 filename_in = '/home/babraham/tigrinya_ocr/eval/eng_corpus.txt'
 fontfile = '/usr/share/fonts/truetype/msttcorefonts/arial.ttf'
 font = 'Arial'
+fonts_by_level = {'easy': {font: fontfile}}
+langs = ['eng']
 
 def main():
     # register all fonts
@@ -17,8 +19,9 @@ def main():
     with open(filename_in) as f:
         text = f.readlines()
     text = [x[:-1].decode('utf-8') for x in text[:25]]
+    filename = remove_ext(filename_in)
 
-    # eval_sample(remove_ext(filename_in), text, font, 'eng')
+    # eval_sample(filename, text, font, langs[0])
 
     eval_all(filename, text, fonts_by_level, langs, False)
 
