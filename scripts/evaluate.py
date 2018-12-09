@@ -186,6 +186,7 @@ def calc_stats(stats):
                 words = 100.0 * stats[level][font][lang][0] / stats[level][font][lang][1]
                 letters = 100.0 * stats[level][font][lang][2] / stats[level][font][lang][3]
                 stats[level][font][lang] = [words, letters]
+    return stats
 
 def pick_best(stats):
     picks = {}
@@ -230,14 +231,20 @@ def eval_all(filename, text, fonts_by_level, langs, cleanup_files=True):
         page_results = eval_langs(filename + str(i), text[i:i+lines_per_page], fonts_by_level, langs, cleanup_files)
         results.append(page_results)
 
+    if logging:
+        print('%d pages' % len(results))
+
     stats_raw = results[0]
     for j in range(1, len(results)):
         stats_raw = sum_stats(stats_raw, results[j])
 
+    if logging:
+        print('Raw stats: ' + str(stats_raw))
+
     stats_full = calc_stats(stats_raw)
-    print('Full stats: ' + stats_full)
+    print('Full stats: ' + str(stats_full))
     lang = pick_best(stats_full)
     print('Best lang: ' + lang)
     stats = mean_stats(stats_full, lang)
-    print('Stats (mean, variance): ' + stats)
+    print('Stats (mean, variance): ' + str(stats))
 
