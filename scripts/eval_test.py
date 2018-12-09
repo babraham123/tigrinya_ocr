@@ -12,8 +12,7 @@ fonts_by_level = {'easy': {font: fontfile}}
 langs = ['eng']
 
 def main():
-    # register all fonts
-    pdfmetrics.registerFont(TTFont(font, fontfile))
+    register_fonts(fonts_by_level)
 
     # read corpus
     with open(filename_in) as f:

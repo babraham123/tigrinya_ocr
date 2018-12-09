@@ -21,6 +21,12 @@ from wand.color import Color
 import pytesseract
 
 lines_per_page = 25
+logging = True
+
+def register_fonts(fonts_by_level):
+    for level, fonts in fonts_by_level.iteritems():
+        for font_name, font_file in fonts.iteritems():
+            pdfmetrics.registerFont(TTFont(font_name, font_dir + font_file))
 
 def pdf_to_text(filename):
     pdf_file = filename + '.pdf'
@@ -49,6 +55,11 @@ def print_ocr(filename, lang):
 def run_ocr(filename, lang):
     # text image to string
     return pytesseract.image_to_string(Image.open(filename), lang=lang)
+
+def post_processing(text):
+    lines = [line.strip(' \n') for line in text.split('\n')]
+    lines[:] = [line for line in lines if line]
+    return '\n'.join(lines)
 
 def remove_ext(filename):
     parts = filename.split('.')
@@ -88,7 +99,9 @@ def create_pdf(filename, text, font):
 
 def eval_langs(filename, text, fonts_by_level, langs, cleanup_files=True):
     groundtruth = '\n'.join(text)
-    print('groundtruth:\n' + groundtruth) ###########
+    if logging:
+        print('groundtruth:\n' + groundtruth)
+
     results = {}
     for level, fonts in fonts_by_level.iteritems():
         print('Level: ' + level)
@@ -101,7 +114,9 @@ def eval_langs(filename, text, fonts_by_level, langs, cleanup_files=True):
             l_res = {}
             for lang in langs:
                 output = run_ocr(img_file, lang)
-                print('output [' + font + ', '+ lang +']:\n' + output) ###########
+                output = post_processing(output)
+                if logging:
+                    print('output [' + font + ', '+ lang +']:\n' + output)
                 stats = check_accuracy(groundtruth, output)
                 l_res[lang] = stats
 
@@ -135,6 +150,8 @@ def check_accuracy(truth, output_raw):
 
         for i, w_truth in enumerate(l_truth):
             letters += len(w_truth)
+            if not w_truth:
+                continue
 
             if i >= len(l_out):
                 continue
@@ -148,6 +165,9 @@ def check_accuracy(truth, output_raw):
             for j, ll_truth in enumerate(w_truth):
                 if j < len(w_out) and ll_truth == w_out[j]:
                     correct_letters += 1
+
+    if logging and (words == 0 or letters == 0):
+        print('Divide by zero will happen in stats!')
 
     return [correct_words, words, correct_letters, letters]
 
