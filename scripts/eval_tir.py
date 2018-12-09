@@ -45,7 +45,7 @@ def main():
     # read corpus
     with open(filename_in) as f:
         text = f.readlines()
-    text = [x.decode('utf-8') for x in text]
+    text = [x[:-1].decode('utf-8') for x in text]
     filename = remove_ext(filename_in)
 
     # eval_sample(filename, text, 'Abyssinica SIL', 'tir')

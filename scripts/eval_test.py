@@ -16,9 +16,11 @@ def main():
     # read corpus
     with open(filename_in) as f:
         text = f.readlines()
-    text = [x.decode('utf-8') for x in text]
+    text = [x[:-1].decode('utf-8') for x in text[:25]]
 
-    eval_sample(remove_ext(filename_in), text, font, 'eng')
+    # eval_sample(remove_ext(filename_in), text, font, 'eng')
+
+    eval_all(filename, text, fonts_by_level, langs, False)
 
 
 if __name__ == "__main__":

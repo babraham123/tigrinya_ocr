@@ -4,7 +4,7 @@
 # python lib to evaluate Tesseract models
 
 # sudo apt-get install pandoc python-pythonmagick
-# pip install reportlab pypandoc pytesseract Pillow
+# pip install reportlab pytesseract Pillow pypandoc pdfminer
 
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, PageBreak
 from reportlab.lib.styles import ParagraphStyle
@@ -14,7 +14,6 @@ from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.colors import black
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-import pypandoc
 import os
 from PIL import Image
 from wand.image import Image as Img
@@ -22,6 +21,10 @@ from wand.color import Color
 import pytesseract
 
 lines_per_page = 25
+
+def pdf_to_text(filename):
+    pdf_file = filename + '.pdf'
+    pass
 
 def pdf_to_tif(filename):
     pdf = filename + '.pdf'
@@ -83,8 +86,9 @@ def create_pdf(filename, text, font):
     # print('Wrote ' + filename)
     return filename
 
-def eval_langs(filename, text, fonts_by_level, langs):
+def eval_langs(filename, text, fonts_by_level, langs, cleanup_files=True):
     groundtruth = '\n'.join(text)
+    print('groundtruth:\n' + groundtruth) ###########
     results = {}
     for level, fonts in fonts_by_level.iteritems():
         print('Level: ' + level)
@@ -97,16 +101,16 @@ def eval_langs(filename, text, fonts_by_level, langs):
             l_res = {}
             for lang in langs:
                 output = run_ocr(img_file, lang)
+                print('output [' + font + ', '+ lang +']:\n' + output) ###########
                 stats = check_accuracy(groundtruth, output)
                 l_res[lang] = stats
 
-            output = pypandoc.convert_file(pdf_file, 'txt')
-            stats = check_accuracy(groundtruth, output)
-            l_res['verify'] = stats
             f_res[font] = l_res
 
-            os.remove(pdf_file)
-            os.remove(img_file)
+            if cleanup_files:
+                os.remove(pdf_file)
+                os.remove(img_file)
+
         results[level] = f_res
     return results
 
@@ -193,17 +197,18 @@ def mean_stats(stats, lang):
     return calcs
 
 def eval_sample(filename, text, font, lang):
-    pdf_file = create_pdf(filename + '_sample', text[0:lines_per_page], font)
+    pdf_file = create_pdf(filename + '_sample', text, font)
     img_file = pdf_to_tif(remove_ext(pdf_file))
     print_ocr(img_file, lang)
     print('\n')
     os.remove(pdf_file)
     os.remove(img_file)
 
-def eval_all(filename, text, fonts_by_level, langs):
+def eval_all(filename, text, fonts_by_level, langs, cleanup_files=True):
     results = []
     for i in range(0, len(text), lines_per_page):
-        results.append(eval_langs(filename + str(i), text[i:i+lines_per_page], fonts_by_level, langs))
+        page_results = eval_langs(filename + str(i), text[i:i+lines_per_page], fonts_by_level, langs, cleanup_files)
+        results.append(page_results)
 
     stats_raw = results[0]
     for j in range(1, len(results)):
