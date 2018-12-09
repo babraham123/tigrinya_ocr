@@ -211,8 +211,8 @@ def mean_stats(stats, lang):
     
         mwords = sum(words[level]) / len(words[level])
         mletters = sum(letters[level]) / len(letters[level])
-        vwords = sum([(w - mwords)**2 / len(w) for w in words[level]])
-        vletters = sum([(l - mletters)**2 / len(l) for l in letters[level]])
+        vwords = sum([(w - mwords)**2 / len(words[level]) for w in words[level]])
+        vletters = sum([(l - mletters)**2 / len(letters[level]) for l in letters[level]])
         # mean and variance for the % of correct words and letters
         calcs[level] = [mwords, vwords, mletters, vletters]
     return calcs
@@ -246,5 +246,4 @@ def eval_all(filename, text, fonts_by_level, langs, cleanup_files=True):
     lang = pick_best(stats_full)
     print('Best lang: ' + lang)
     stats = mean_stats(stats_full, lang)
-    print('Stats (mean, variance): ' + str(stats))
-
+    print('Stats (mean, variance) x (words, letters):\n' + str(stats))
