@@ -56,7 +56,7 @@ def run_ocr(filename, lang):
     # text image to string
     return pytesseract.image_to_string(Image.open(filename), lang=lang)
 
-def post_processing(text):
+def text_processing(text):
     lines = [line.strip(' \n') for line in text.split('\n')]
     lines[:] = [line for line in lines if line]
     return '\n'.join(lines)
@@ -98,7 +98,7 @@ def create_pdf(filename, text, font):
     return filename
 
 def eval_langs(filename, text, fonts_by_level, langs, cleanup_files=True):
-    groundtruth = '\n'.join(text)
+    groundtruth = text_processing('\n'.join(text))
     if logging:
         print('groundtruth:\n' + groundtruth)
 
@@ -114,7 +114,7 @@ def eval_langs(filename, text, fonts_by_level, langs, cleanup_files=True):
             l_res = {}
             for lang in langs:
                 output = run_ocr(img_file, lang)
-                output = post_processing(output)
+                output = text_processing(output)
                 if logging:
                     print('output [' + font + ', '+ lang +']:\n' + output)
                 stats = check_accuracy(groundtruth, output)
