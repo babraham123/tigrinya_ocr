@@ -225,8 +225,8 @@ def means_to_str(means):
         output += lang + ':\n'
         for level, stats in levels.iteritems():
             vals = [round(stat, 2) for stat in stats]
-            output = '  ' + level + ': ' + str(vals) + '\n'
-    return output
+            output += '  ' + level + ': ' + str(vals) + '\n'
+    return output[:-1]
 
 def eval_sample(filename, text, font, lang):
     pdf_file = create_pdf(filename + '_sample', text, font)
@@ -242,15 +242,14 @@ def eval_all(filename, text, fonts_by_level, langs, cleanup_files=True):
         page_results = eval_langs(filename + str(i), text[i:i+lines_per_page], fonts_by_level, langs, cleanup_files)
         results.append(page_results)
 
-    if logging:
-        print('%d pages' % len(results))
-
     stats_raw = results[0]
     for j in range(1, len(results)):
         stats_raw = sum_stats(stats_raw, results[j])
 
     if logging:
         print('Raw stats:\n' + str(stats_raw))
+        print('%d pages' % len(results))
+
     stats_full = calc_stats(stats_raw)
     # print('Full stats:\n' + str(stats_full))
     stats = mean_stats(stats_full, langs)
