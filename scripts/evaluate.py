@@ -198,24 +198,35 @@ def pick_best(stats):
                 picks[lang] = picks.get(lang, 0) + sum(stats[level][font][lang])
     return max(picks, key=picks.get)
 
-def mean_stats(stats, lang):
+def mean_stats(stats, langs):
     words = {}
     letters = {}
     calcs = {}
-    for level in stats:
-        words[level] = []
-        letters[level] = []
-        for font in stats[level]:
-            words[level].append(stats[level][font][lang][0])
-            letters[level].append(stats[level][font][lang][1])
-    
-        mwords = sum(words[level]) / len(words[level])
-        mletters = sum(letters[level]) / len(letters[level])
-        vwords = sum([(w - mwords)**2 / len(words[level]) for w in words[level]])
-        vletters = sum([(l - mletters)**2 / len(letters[level]) for l in letters[level]])
-        # mean and variance for the % of correct words and letters
-        calcs[level] = [mwords, vwords, mletters, vletters]
+    for lang in langs:
+        calcs[lang] = {}
+        for level in stats:
+            words[level] = []
+            letters[level] = []
+            for font in stats[level]:
+                words[level].append(stats[level][font][lang][0])
+                letters[level].append(stats[level][font][lang][1])
+        
+            mwords = sum(words[level]) / len(words[level])
+            mletters = sum(letters[level]) / len(letters[level])
+            vwords = sum([(w - mwords)**2 / len(words[level]) for w in words[level]])
+            vletters = sum([(l - mletters)**2 / len(letters[level]) for l in letters[level]])
+            # mean and variance for the % of correct words and letters
+            calcs[lang][level] = [mwords, vwords, mletters, vletters]
     return calcs
+
+def means_to_str(means):
+    output = ''
+    for lang, levels in means.iteritems():
+        output += lang + ':\n'
+        for level, stats in levels.iteritems():
+            vals = [round(stat, 2) for stat in stats]
+            output = '  ' + level + ': ' + str(vals) + '\n'
+    return output
 
 def eval_sample(filename, text, font, lang):
     pdf_file = create_pdf(filename + '_sample', text, font)
@@ -239,11 +250,10 @@ def eval_all(filename, text, fonts_by_level, langs, cleanup_files=True):
         stats_raw = sum_stats(stats_raw, results[j])
 
     if logging:
-        print('Raw stats: ' + str(stats_raw))
-
+        print('Raw stats:\n' + str(stats_raw))
     stats_full = calc_stats(stats_raw)
-    print('Full stats: ' + str(stats_full))
+    # print('Full stats:\n' + str(stats_full))
+    stats = mean_stats(stats_full, langs)
+    print('Stats (mean, variance) x (words, letters):\n' + means_to_str(stats))
     lang = pick_best(stats_full)
-    print('Best lang: ' + lang)
-    stats = mean_stats(stats_full, lang)
-    print('Stats (mean, variance) x (words, letters):\n' + str(stats))
+    print('Best lang: ' + lang + '\n')
