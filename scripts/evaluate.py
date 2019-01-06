@@ -28,10 +28,6 @@ def register_fonts(fonts_by_level, font_dir=''):
         for font_name, font_file in fonts.iteritems():
             pdfmetrics.registerFont(TTFont(font_name, font_dir + font_file))
 
-def pdf_to_text(filename):
-    pdf_file = filename + '.pdf'
-    pass
-
 def pdf_to_tif(filename):
     pdf = filename + '.pdf'
     tif = filename + '.tif'
