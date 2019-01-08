@@ -1,0 +1,32 @@
+Intro::
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install cmake vim build-essential git
+
+Connect to WiFi::
+sudo vi /etc/wpa_supplicant.conf
+```
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+country=US
+update_config=1
+
+network={
+    ssid="Home Wifi"
+    psk="mypassword"
+}
+```
+
+VNC::
+sudo apt-get install tightvncserver
+vncserver
+vncserver -kill :1
+# on Mac
+open Screen Share
+vnc://192.168.50.59:5901
+
+Aliases::
+vi ~/.bash_aliases
+```
+alias ls='ls -a'
+alias vi='vim'
+```
