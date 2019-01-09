@@ -13,9 +13,9 @@ def main():
     wrapper = textwrap.TextWrapper()
     wrapper.width = char_limit
     # all whitespace chars are converted to space: '\t\n\v\f\r'
-    wrapper.expand_tabs = true
-    wrapper.replace_whitespace = true
-    wrapper.break_long_words = false
+    wrapper.expand_tabs = True
+    wrapper.replace_whitespace = True
+    wrapper.break_long_words = False
 
     # read corpus
     with open(file_in) as f:
@@ -33,3 +33,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
