@@ -5,7 +5,8 @@
 
 import textwrap
 
-char_limit = 100
+char_limit = 90
+encoding = 'utf-8'
 file_in = '/home/babraham/tigrinya_ocr/raw_data/corpus.txt'
 file_out = 'wrapped_corpus.txt'
 
@@ -19,15 +20,15 @@ def main():
 
     # read corpus
     with open(file_in) as f:
-        # text = f.readlines()
         text = f.read()
 
-    text = text.decode('utf-8')
+    text = text.decode(encoding)
     lines = text.splitlines()
     lines = [wrapper.fill(line) for line in lines]
     text = '\n'.join(lines)
+    text = text.encode(encoding)
     
-    with open(file_out) as f:
+    with open(file_out, 'w+') as f:
         f.write(text)
 
 
