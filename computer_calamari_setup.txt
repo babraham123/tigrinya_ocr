@@ -15,11 +15,6 @@ python3 -V
 curl https://bootstrap.pypa.io/get-pip.py | sudo -H python3.6
 pip3 -V
 
-# install gpu accelerated tensorflow using the computer_gpu_setup guide.
-sudo pip3 install tensorflow-gpu
-nvcc --version
-python3 -c 'import tensorflow as tf; print(tf.__version__)'
-
 sudo pip3 install numpy matplotlib pandas
 sudo apt-get install -y libpangocairo-1.0 libxml2 libblas3 liblapack3
 sudo pip3 install kraken calamari_ocr hocr-tools
@@ -28,4 +23,14 @@ cd ocr-gt-tools/
 sudo make apt-get
 sudo make dev-apt-get
 cd ..
+
+python3 -c 'import torch; print(torch.version.cuda); print(torch.__version__)'
+
+# may be necessary
+sudo pip3 uninstall lxml
+sudo pip3 install lxml
+
+# sources of training data
+http://shabait.com/eritrea-haddas
+http://shabait.com/haddas-ertra
 

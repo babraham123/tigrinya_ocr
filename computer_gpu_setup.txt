@@ -48,8 +48,8 @@ sudo vi /etc/environment
 LD_LIBRARY_PATH="/usr/local/cuda-9.0/lib64"
 ```
 source /etc/environment
+echo "/usr/local/cuda-9.0/lib64" | sudo tee /etc/ld.so.conf.d/cuda.conf
 sudo ldconfig
-sudo apt-get install -y g++ freeglut3-dev build-essential libx11-dev libxmu-dev libxi-dev libglu1-mesa libglu1-mesa-dev
 
 ## CUDNN
 ## join the developer program: https://developer.nvidia.com/developer-program
@@ -58,6 +58,13 @@ tar -xzvf cudnn-9.0-linux-x64-v7.1.tgz
 sudo cp cuda/include/cudnn.h /usr/local/cuda/include
 sudo cp cuda/lib64/libcudnn* /usr/local/cuda/lib64
 sudo chmod a+r /usr/local/cuda/include/cudnn.h /usr/local/cuda/lib64/libcudnn*
+sudo rm /usr/local/cuda-9.0/lib64/libcudnn.so /usr/local/cuda-9.0/lib64/libcudnn.so.7
+sudo ln -s /usr/local/cuda-9.0/lib64/libcudnn.so.7.1.3 /usr/local/cuda-9.0/lib64/libcudnn.so.7
+sudo ln -s /usr/local/cuda-9.0/lib64/libcudnn.so.7 /usr/local/cuda-9.0/lib64/libcudnn.so
+sudo ldconfig
+
+# Needed for torcs
+sudo apt-get install -y g++ freeglut3-dev build-essential libx11-dev libxmu-dev libxi-dev libglu1-mesa libglu1-mesa-dev
 
 ## Tensorflow
 sudo apt-get install libcupti-dev
@@ -69,19 +76,47 @@ sudo vi /etc/environment
 CUDA_HOME="/usr/local/cuda"
 ```
 source /etc/environment
-python -V
-## pip3 if python3.n
+
+## or python3 / pip3
 sudo apt-get install python-pip python-dev
-#pip install tensorflow-gpu
-sudo pip  install --upgrade https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-1.6.0-cp27-none-linux_x86_64.whl
-## validate
+# install gpu accelerated tensorflow using the computer_gpu_setup guide.
+sudo pip install --ignore-installed --upgrade tensorflow-gpu==1.12.0
+# for compute capability 3.0, must build from source
+sudo pip install -U pip six numpy wheel mock
+sudo pip install -U keras_applications==1.0.6 --no-deps
+sudo pip install -U keras_preprocessing==1.0.5 --no-deps
+sudo apt-get install pkg-config zip g++ zlib1g-dev unzip openjdk-8-jdk
+wget https://github.com/bazelbuild/bazel/releases/download/0.18.0/bazel-0.18.0-installer-linux-x86_64.sh
+chmod +x bazel-0.18.0-installer-linux-x86_64.sh
+./bazel-0.18.0-installer-linux-x86_64.sh --user
+git clone https://github.com/tensorflow/tensorflow.git
+cd tensorflow
+git checkout r1.12
+./configure
+sed -i '1s/^/import /home/babraham/tensorflow/tools/bazel.rc\n/' .bazelrc
+bazel test -c opt -- //tensorflow/... -//tensorflow/compiler/... -//tensorflow/contrib/lite/...
+bazel build --config=opt --config=cuda --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" //tensorflow/tools/pip_package:build_pip_package
+./bazel-bin/tensorflow/tools/pip_package/build_pip_package /home/babraham/tensorflow_pkg
+sudo pip install /home/babraham/tensorflow_pkg/tensorflow-1.12.0-cp36-cp36m-linux_x86_64.whl
+
+# Validate versions and devices
+lsmod | grep nouveau  # should be blank
+pip list | grep tensorflow
+nvcc --version
+cat /usr/local/cuda/include/cudnn.h | grep -A2 'define CUDNN_MAJOR'
+python -c 'import tensorflow as tf; print(tf.__version__)'
+nvidia-smi
+cd /usr/local/cuda/samples/1_Utilities/deviceQuery
+sudo make
+cd ~
+/usr/local/cuda/samples/bin/x86_64/linux/release/deviceQuery
+
 python
 ```
 import tensorflow as tf
 hello = tf.constant('Hello, TensorFlow!')
-sess = tf.Session()
+sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 print(sess.run(hello))
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
 ```
-
-
-

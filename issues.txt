@@ -1,10 +1,15 @@
+Calamari Issues::
+1. tensorflow doesn't detect GPU. Install by binary version only works with compute compatability level 3.5, not 3.0 for geforce 650. Solution was to build from source. 
+https://github.com/tensorflow/tensorflow/issues/17445
+https://stackoverflow.com/questions/44829085/tensorflow-not-running-on-gpu
+2. Training randomly freezes. May be due to tf version 0.12.
+
 Kraken Issues::
 0. Overall Kraken is a joy to use, especially compared to Tesseract. The API is clean, modular and only exposes important options. The docs layout an end to end workflow for usage and training, with great defaults. I also want to try swapping in calamari ocr for the model.
 1. Haven't tested the accuracy yet, but it seems like kraken produces small models that are sample efficient but more specialized to specific fonts. Will the network be large enough to handle the large number of Ge'ez glyphs (~300)? I plan on training from scratch with a large corpus (~100pg) that includes all of the english letters. From there I will fine tune for specific fonts. Combine with degradation options and possibly one other font for more data.
-2. Need to word wrap corpus before generating synthetic data. Python script for unicode support.
-3. Script detection is currently broken. Will jointly train for Tigrinya and English for now.
-4. There's a bug with CUDA 9.0, python 3.6 and Pytorch.
-5. The new type suggestions require python 3.6, which requires a few hacks to work on ubuntu 16.04.
+2. Script detection is currently broken. Will jointly train for Tigrinya and English for now.
+3. There's a bug with CUDA 9.0, python 3.6 and Pytorch. Shows up during ocr.
+4. The new type suggestions require python 3.6, which requires a few hacks to work on ubuntu 16.04.
 
 Tesseract Issues::
 0. Overall Tesseract is very hard to use and poorly documented (at least for the 4.0 version that offers LSTM support). Also there doesn't seem to be a straightforward default route for training a new model. Finally, the ML engine is all custom, which seems ridiculous and hard to work with.
@@ -17,3 +22,68 @@ Eval Char error rate=1.9199812, Word error rate=4.7033258
 Please correct --font arg.
 ERROR: /tmp/tmp.1qYty2A18l/tir/tir.Ethiopic_WashRa_SemiBoldEthiopic_Yigezu_Bisrat_GothicEthiopic_TintCode2003Ethiopic_YebseEthiopic_ZelanEthiopic_WookianosAbyssinica_SILAbyssinica_SIL_ZaimaGF_Zemen_UnicodeAbyssinica_SIL_SebatbeitEthiopic_FantuwuaEthiopic_Yigezu_Bisrat_GofferEthiopia_JiretEthiopic_WashRa_BoldEthiopic_HiwuaAbyssinica_SIL_Ximtanga.exp0.box does not exist or is not readable
 ERROR: /tmp/tmp.1qYty2A18l/tir/tir.Ethiopic_WashRa_SemiBoldEthiopic_Yigezu_Bisrat_GothicEthiopic_TintCode2003Ethiopic_YebseEthiopic_ZelanEthiopic_WookianosAbyssinica_SILAbyssinica_SIL_ZaimaGF_Zemen_UnicodeAbyssinica_SIL_SebatbeitEthiopic_FantuwuaEthiopic_Yigezu_Bisrat_GofferEthiopia_JiretEthiopic_WashRa_BoldEthiopic_HiwuaAbyssinica_SIL_Ximtanga.exp0.box does not exist or is not readable
+
+
+calamari-ocr 0.2.2 requires tensorflow>=1.6, which is not installed.
+coremltools 2.0 has requirement six==1.10.0, but you'll have six 1.12.0 which is incompatible.
+
+babraham@babraham-Vostro-260:~/tigrinya_ocr/calamari$ kraken -i eng_corpus-Arial.png eng_corpus-Arial.txt ocr --lines eng_corpus-Arial.json -m ~/.config/kraken/en-default.pronn 
+Loading RNN default ✓
+Traceback (most recent call last):
+  File "/home/babraham/.local/bin/kraken", line 11, in <module>
+    sys.exit(cli())
+  File "/usr/local/lib/python3.6/dist-packages/click/core.py", line 764, in __call__
+    return self.main(*args, **kwargs)
+  File "/usr/local/lib/python3.6/dist-packages/click/core.py", line 717, in main
+    rv = self.invoke(ctx)
+  File "/usr/local/lib/python3.6/dist-packages/click/core.py", line 1164, in invoke
+    return _process_result(rv)
+  File "/usr/local/lib/python3.6/dist-packages/click/core.py", line 1102, in _process_result
+    **ctx.params)
+  File "/usr/local/lib/python3.6/dist-packages/click/core.py", line 555, in invoke
+    return callback(*args, **kwargs)
+  File "/usr/local/lib/python3.6/dist-packages/kraken/kraken.py", line 220, in process_pipeline
+    task(base_image=base_image, input=input, output=output)
+  File "/usr/local/lib/python3.6/dist-packages/kraken/kraken.py", line 157, in recognizer
+    for pred in bar:
+  File "/usr/local/lib/python3.6/dist-packages/click/_termui_impl.py", line 285, in generator
+    for rv in self.iter:
+  File "/usr/local/lib/python3.6/dist-packages/kraken/rpred.py", line 301, in rpred
+    preds = network.predict(line)
+  File "/usr/local/lib/python3.6/dist-packages/kraken/lib/models.py", line 81, in predict
+    o = self.forward(line)
+  File "/usr/local/lib/python3.6/dist-packages/kraken/lib/models.py", line 69, in forward
+    o = self.nn.nn(line)
+  File "/usr/local/lib/python3.6/dist-packages/torch/nn/modules/module.py", line 489, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/usr/local/lib/python3.6/dist-packages/torch/nn/modules/container.py", line 92, in forward
+    input = module(input)
+  File "/usr/local/lib/python3.6/dist-packages/torch/nn/modules/module.py", line 489, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/usr/local/lib/python3.6/dist-packages/kraken/lib/layers.py", line 350, in forward
+    o, _ = self.layer(inputs)
+  File "/usr/local/lib/python3.6/dist-packages/torch/nn/modules/module.py", line 489, in __call__
+    result = self.forward(*input, **kwargs)
+TypeError: forward() missing 1 required positional argument: 'hidden'
+
+
+babraham@babraham-Vostro-260:~/torch$ python3 nn.py 
+/usr/local/lib/python3.6/dist-packages/torch/cuda/__init__.py:117: UserWarning: 
+    Found GPU0 GeForce GTX 650 which is of cuda capability 3.0.
+    PyTorch no longer supports this GPU because it is too old.
+    
+  warnings.warn(old_gpu_warn % (d, name, major, capability[1]))
+Traceback (most recent call last):
+  File "nn.py", line 41, in <module>
+    y_pred = model(x)
+  File "/usr/local/lib/python3.6/dist-packages/torch/nn/modules/module.py", line 489, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/usr/local/lib/python3.6/dist-packages/torch/nn/modules/container.py", line 92, in forward
+    input = module(input)
+  File "/usr/local/lib/python3.6/dist-packages/torch/nn/modules/module.py", line 489, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/usr/local/lib/python3.6/dist-packages/torch/nn/modules/linear.py", line 67, in forward
+    return F.linear(input, self.weight, self.bias)
+  File "/usr/local/lib/python3.6/dist-packages/torch/nn/functional.py", line 1352, in linear
+    ret = torch.addmm(torch.jit._unwrap_optional(bias), input, weight.t())
+RuntimeError: CUDA error: no kernel image is available for execution on the device

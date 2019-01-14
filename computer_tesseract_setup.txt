@@ -57,7 +57,7 @@ sudo chown root /usr/local/share/fonts/tir_fonts/*.ttf
 sudo fc-cache -fv
 ## list all fonts
 fc-list | grep tir_fonts
-text2image --fonts_dir /usr/share/fonts --list_available_fonts
+text2image --fonts_dir /usr/local/share/fonts --list_available_fonts
 ## xheights
 git clone http://ancientgreekocr.org/grctraining.git
 cd grctraining
