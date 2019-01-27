@@ -33,4 +33,8 @@ calamari-eval --gt *.gt.txt
 # train a calamari model
 calamari-cross-fold-train --files training_data/*.png --best_models_dir models --temporary_dir tmp &> training.log
 
+# train a single fold at a time
+sudo service lightdm stop
+sudo su
+calamari-train --files config/fold_0.json &>> training.log && ...
 

@@ -1,0 +1,39 @@
+# Other important software.
+
+sudo apt-get install scantailor
+# ScanTailor tutorial
+https://github.com/scantailor/scantailor/wiki/User-Guide
+https://vimeo.com/12524529
+
+git clone https://github.com/fgaim/HornMorpho.git
+cd HornMorpho
+sudo python3 setup.py install
+cd ~
+
+sudo pip3 install hocr-tools
+
+git clone https://github.com/UB-Mannheim/ocr-gt-tools.git
+cd ocr-gt-tools/
+sudo make apt-get
+sudo make dev-apt-get
+cd ~
+
+sudo pip3 install opencv-python
+sudo python3 -c 'import cv2; print(cv2.__version__)'
+
+git clone https://github.com/jbaiter/hocrviewer-mirador.git
+cd hocrviewer-mirador
+sudo pip3 install -r requirements.txt
+cd ~
+
+sudo apt-get install python3.6-tk
+git clone https://github.com/azmiozgen/text-detection.git
+cd text-detection
+sudo pip3 install -r requirements.txt
+cd ~
+
+sudo apt-get install libmagickwand-dev
+sudo pip3 install Wand
+
+sudo pip3 install pypdf2
+

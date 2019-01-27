@@ -2,7 +2,9 @@ Calamari Issues::
 1. tensorflow doesn't detect GPU. Install by binary version only works with compute compatability level 3.5, not 3.0 for geforce 650. Solution was to build from source. 
 https://github.com/tensorflow/tensorflow/issues/17445
 https://stackoverflow.com/questions/44829085/tensorflow-not-running-on-gpu
-2. Training randomly freezes. May be due to tf version 0.12.
+2. Training randomly freezes, due to running multiple tf sessions concurrently. May be fixed by downgrading tf version 0.12 (.6 or .8).
+3. failed call to cuInit, initialization error. Solved by using sudo.
+4. ResourceExhaustedError: OOM. Need to install more RAM or reduce batch size.
 
 Kraken Issues::
 0. Overall Kraken is a joy to use, especially compared to Tesseract. The API is clean, modular and only exposes important options. The docs layout an end to end workflow for usage and training, with great defaults. I also want to try swapping in calamari ocr for the model.

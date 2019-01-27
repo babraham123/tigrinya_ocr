@@ -30,3 +30,6 @@ vi ~/.bash_aliases
 alias ls='ls -a'
 alias vi='vim'
 ```
+
+Check if the X server is on::
+xset q || pidof X || xprop -root

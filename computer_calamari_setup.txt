@@ -17,12 +17,7 @@ pip3 -V
 
 sudo pip3 install numpy matplotlib pandas
 sudo apt-get install -y libpangocairo-1.0 libxml2 libblas3 liblapack3
-sudo pip3 install kraken calamari_ocr hocr-tools
-git clone https://github.com/UB-Mannheim/ocr-gt-tools.git
-cd ocr-gt-tools/
-sudo make apt-get
-sudo make dev-apt-get
-cd ..
+sudo pip3 install kraken calamari_ocr
 
 python3 -c 'import torch; print(torch.version.cuda); print(torch.__version__)'
 
