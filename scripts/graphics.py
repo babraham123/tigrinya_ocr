@@ -80,7 +80,6 @@ def pdf_merger(fname):
 
 def read_kraken_bboxes(filename):
     data = {}
-    boxes = []
     with open(filename) as json_file:  
         data = json.load(json_file)
 
@@ -90,11 +89,14 @@ def read_kraken_bboxes(filename):
         else:
             return []
 
+    if not isinstance(data['boxes'][0][0], list):
+        return data['boxes']
+
+    boxes = []
     for line in data['boxes']:
         for lang_group in line:
             # x1,y1 , x2,y2
             boxes.append(lang_group[1])
-
     return boxes
 
 
