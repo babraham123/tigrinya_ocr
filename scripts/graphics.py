@@ -102,13 +102,14 @@ def read_kraken_bboxes(filename):
 
 def draw_boxes(filename, boxes):
     with Drawing() as draw:
-        draw.stroke_width = 1
+        draw.stroke_width = 2
         draw.stroke_color = Color('red')
-        # draw.fill_color = Color('white')
+        draw.fill_color = Color('white')
+        draw.fill_opacity = 0
         for box in boxes:
             draw.polygon([(box[0], box[1]), (box[2], box[1]), (box[2], box[3]), (box[0], box[3])])
         # with Image(width=100, height=100, background=Color('lightblue')) as image:
         with Image(filename=filename) as image:
             draw(image)
-            # image.save(filename=filename)
+            image.save(filename=filename)
 

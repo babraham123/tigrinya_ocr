@@ -9,6 +9,7 @@ import os.path
 filename_1 = 'TIGRINA SUN 9 APR 2017.pdf'
 filename_2 = 'TIGRINA_SUN_9_APR_2017-0.png'
 filename_3 = 'lines.json'
+filename_4 = 'bw.png'
 
 
 def main():
@@ -18,7 +19,7 @@ def main():
 
     if os.path.exists(filename_3):
         boxes = read_kraken_bboxes(filename_3)
-        draw_boxes(filename_2, boxes)
+        draw_boxes(filename_4, boxes)
         print('Drew kraken boxes...')
 
     
