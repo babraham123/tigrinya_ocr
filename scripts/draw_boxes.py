@@ -5,24 +5,30 @@
 
 from graphics import *
 import os.path
-
-filename_1 = 'TIGRINA SUN 9 APR 2017.pdf'
-filename_2 = 'TIGRINA_SUN_9_APR_2017-0.png'
-filename_3 = 'lines.json'
-filename_4 = 'bw.png'
+import sys
 
 
 def main():
-    if not os.path.exists(filename_2):
-        pdf_to_png(filename_1)
+    image_file = sys.argv[1]
+    box_file = sys.argv[2]
+
+    if len(sys.argv) != 3:
+        print('Incorrect arguments!')
+        exit()
+    if not os.path.exists(image_file) or not os.path.exists(box_file):
+        print('File(s) do not exist!')
+        exit()
+
+    (path, ext) = os.path.splitext(image_file)
+    if ext.lower() == '.pdf':
+        pdf_to_png(image_file)
+        image_file = path + '.png'
         print('Converted pdf to png...')
 
-    if os.path.exists(filename_3):
-        boxes = read_kraken_bboxes(filename_3)
-        draw_boxes(filename_4, boxes)
-        print('Drew kraken boxes...')
+    boxes = read_kraken_bboxes(box_file)
+    draw_boxes(image_file, boxes)
+    print('Drew kraken boxes...')
 
-    
 
 if __name__ == "__main__":
     main()
