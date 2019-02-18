@@ -2,7 +2,8 @@
 # commands to train and run Tesseract OCR
 
 dpkg --listfiles tesseract-ocr-eng
-export TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+
+tesseract --print-parameters >> tessconfigs.log
 
 # convert a pdf into tiff files, one per page
 convert -density 300 tir_testdata.pdf -depth 8 -background white \
@@ -92,4 +93,17 @@ lstmeval --model ~/tigrinya_ocr/training/checkpoint \
 export TESSDATA_PREFIX=/home/babraham/tigrinya_ocr/training
 java -jar VietOCR.jar
 
- 
+# segmentation
+convert -density 300 TIGRINA_SUN_9_APR_2017.pdf -depth 8 -background white -flatten +matte TIGRINA_SUN_9_APR_2017-%02d.tiff
+# convert TIGRINA_SUN_9_APR_2017-00.tiff -bordercolor White -border 10x10 427-1b.jpg
+ls /usr/share/tesseract-ocr/4.00/tessdata/configs/
+vi tessconfig
+```
+debug_file tesseract.log
+tessedit_write_images 1
+tessedit_create_hocr 1
+segment_nonalphabetic_script 1
+tessedit_dump_pageseg_images 1
+```
+tesseract TIGRINA_SUN_9_APR_2017-00.tiff tir_eval-00 -l tir --psm 2 tessconfig
+tesseract TIGRINA_SUN_9_APR_2017-00.tiff tir_eval-01 -l tir --psm 1 hocr

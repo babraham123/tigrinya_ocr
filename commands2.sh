@@ -7,8 +7,8 @@ kraken -i image.tif image.txt binarize segment ocr
 # binarize a single image using the nlbin algorithm
 kraken -i image.tif bw.png binarize
 
-# segment a binarized image into reading-order sorted lines, with script detection
-kraken -i bw.png lines.json segment -s
+# segment a binarized image into reading-order sorted lines, -s for script detection
+kraken -i bw.png lines.json segment
 
 kraken list
 kraken get default
@@ -37,4 +37,13 @@ calamari-cross-fold-train --files training_data/*.png --best_models_dir models -
 sudo service lightdm stop
 sudo su
 calamari-train --files config/fold_0.json &>> training.log && ...
+
+# View hocr file
+cd ~/hocrviewer-mirador
+sudo python3 hocrviewer.py serve ~/tesseract
+
+# hocr to pdf
+convert TIGRINA_SUN_9_APR_2017-00.tiff TIGRINA_SUN_9_APR_2017-00.jpeg
+mv TIGRINA_SUN_9_APR_2017-00.jpeg tir_eval-01.jpeg
+hocr-pdf . > out.pdf
 

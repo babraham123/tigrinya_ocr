@@ -5,6 +5,10 @@ sudo apt-get install scantailor
 https://github.com/scantailor/scantailor/wiki/User-Guide
 https://vimeo.com/12524529
 
+# VIA image annotation tool
+wget http://www.robots.ox.ac.uk/~vgg/software/via/downloads/via-2.0.5.zip
+unzip via-2.0.5.zip
+
 git clone https://github.com/fgaim/HornMorpho.git
 cd HornMorpho
 sudo python3 setup.py install
@@ -24,6 +28,8 @@ sudo python3 -c 'import cv2; print(cv2.__version__)'
 git clone https://github.com/jbaiter/hocrviewer-mirador.git
 cd hocrviewer-mirador
 sudo pip3 install -r requirements.txt
+sudo pip3 install click_log gunicorn iiif-prezi
+sudo pip3 install Flask-IIIF --ignore-installed
 cd ~
 
 sudo apt-get install python3.6-tk

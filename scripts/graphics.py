@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # python lib to handle drawing and file conversion tasks.
+# ref: http://docs.wand-py.org/en/0.5.0/guide/draw.html
 
 import glob
 import json

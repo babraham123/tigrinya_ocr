@@ -32,6 +32,8 @@ sudo pip install pytesseract reportlab pypandoc Pillow Wand opencv-python numpy
 sudo vi /etc/ImageMagick/policy.xml
 // change PDF and LABEL policy rights to "read|write"
 
+echo "export TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata" >> ~/.bashrc
+
 # Tesseract4Java
 wget https://github.com/tesseract4java/tesseract4java/releases/download/v0.1.0/tesseract4java-0.1.0-linux-x86_64.jar
 java -jar tesseract4java-0.1.0-linux-x86_64.jar

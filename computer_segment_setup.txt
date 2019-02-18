@@ -1,0 +1,54 @@
+# Install dhSegment, VGG Image Annotator and other segmentation related programs.
+
+# dhSegment, Res-Net based segmentator. Does classification in postprocessing.
+git clone https://github.com/dhlab-epfl/dhSegment.git
+cd dhSegment
+vi setup.py
+# change all == to >=
+sudo pip3 install numpy==1.15.4
+sudo pip3 install .
+cd pretrained_models/
+sudo python3 download_resnet_pretrained_model.py
+
+cd ../demo
+wget https://github.com/dhlab-epfl/dhSegment/releases/download/v0.2/model.zip
+unzip model.zip
+cd ..
+sudo python3 demo.py 
+cd ..
+
+mkdir segment && cd segment
+mkdir images
+mkdir labels
+
+
+# train_config.json
+{
+  "training_params" : {
+    "learning_rate": 5e-5,
+    "batch_size": 1,
+    "make_patches": false,
+    "training_margin" : 0,
+    "n_epochs": 30,
+    "data_augmentation" : true,
+    "data_augmentation_max_rotation" : 0.2,
+    "data_augmentation_max_scaling" : 0.2,
+    "data_augmentation_flip_lr": true,
+    "data_augmentation_flip_ud": true,
+    "data_augmentation_color": false,
+    "evaluate_every_epoch" : 10
+  },
+  "pretrained_model_name" : "resnet50",
+  "prediction_type": "CLASSIFICATION",
+  "train_data" : "train",
+  "eval_data" : "eval_1",
+  "classes_file" : "classes.txt",
+  "model_output_dir" : "seg_model",
+  "gpu" : "0"
+}
+
+# classes.txt
+0 0 0
+255 0 0
+
+
