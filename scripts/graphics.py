@@ -4,19 +4,44 @@
 # python lib to handle drawing and file conversion tasks.
 # ref: http://docs.wand-py.org/en/0.5.0/guide/draw.html
 
-import glob
-import json
-import os
+import glob, json, os, random, math, subprocess
 from wand.image import Image
 from wand.color import Color
 from wand.drawing import Drawing
 from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
 
-filename_ = 'TIGRINA SUN 9 APR 2017.pdf'
+
+def convert_to_png(img_file, output_path, resolution=300):
+    (name, ext) = os.path.splitext(img_file)
+    ext = ext.lower()
+    ret = None
+    if ext == '.pdf':
+        ret = pdf_to_png(img_file, output_path=output_path, resolution=resolution)
+        print('Converted: ', img_file)
+    elif ext in ['.png', '.jpg', '.jpeg', '.tif', '.tiff']:
+        ret = img_to_png(img_file, output_path=output_path, resolution=resolution)
+        print('Converted: ', img_file)
+    elif ext in ['.doc', '.docx']:
+        pdf = doc_to_pdf(img_file, output_path=output_path)
+        ret = pdf_to_png(pdf, output_path=output_path, resolution=resolution)
+        os.remove(pdf)
+    else:
+        print('unknown file type: ', img_file)
+    return ret
+
+def doc_to_pdf(filename, output_path='.'):
+    args = ['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', output_path, filename]
+    base_name = os.path.splitext(os.path.basename(filename))[0]
+    try:
+        subprocess.run(args, check=True) # shell=True
+        return os.path.join(output_path, base_name + '.pdf')
+    except Exception as ex:
+        print(ex)
+        return None
 
 
-def pdf_to_png(filename, output_path='.', resolution=300):
-    """ Convert a PDF into images.
+def pdf_to_png(filename, output_path='.', max_pages=None, resolution=300):
+    """ Convert a PDF into png images.
 
         All the pages will give a single png file with format:
         {pdf_filename}-{page_number}.png
@@ -25,17 +50,119 @@ def pdf_to_png(filename, output_path='.', resolution=300):
         replace it with a white background.
     """
     all_pages = Image(filename=filename, resolution=resolution)
-    num_digits = len(str(len(all_pages.sequence)))
-    for i, page in enumerate(all_pages.sequence):
-        with Image(page) as img:
+    num_pages = len(all_pages.sequence)
+    num_digits = len(str(num_pages))
+    base_name = os.path.splitext(os.path.basename(filename))[0]
+
+    ret = []
+    selected = []
+    if not max_pages or num_pages <= max_pages:
+        selected = [i for i in range(num_pages)]
+    else:
+        inc = math.floor(num_pages / max_pages)
+        selected = [i for i in range(0, num_pages, inc)]
+
+    # for i, page in enumerate(all_pages.sequence):
+    for i in selected:
+        with Image(all_pages.sequence[i]) as img:
             img.format = 'png'
             img.background_color = Color('white')
             img.alpha_channel = 'remove'
-            image_filename = os.path.splitext(os.path.basename(filename))[0]
+            image_filename = base_name
             image_filename = image_filename.replace(' ', '_')
             image_filename = '{}-{}.png'.format(image_filename, str(i).zfill(num_digits))
             image_filename = os.path.join(output_path, image_filename)
             img.save(filename=image_filename)
+            ret.append(image_filename)
+    return ret
+
+
+def img_to_png(filename, output_path='.', resolution=300):
+    """ Convert any supported image format into png.
+
+        All the pages will give a single png file with format:
+        {pdf_filename}-{page_number}.png
+
+        The function removes the alpha channel from the image and
+        replace it with a white background.
+    """
+    image_filename = ''
+    base_name = os.path.splitext(os.path.basename(filename))[0]
+
+    with Image(filename=filename, resolution=resolution) as img:
+        img.format = 'png'
+        img.background_color = Color('white')
+        img.alpha_channel = 'remove'
+        image_filename = base_name
+        image_filename = image_filename.replace(' ', '_')
+        image_filename = os.path.join(output_path, image_filename)
+        img.save(filename=image_filename)
+    return [image_filename]
+
+
+def slice_img(filename, max_length, overlap_ratio):
+    """ Convert any supported image format into png.
+
+        All the pages will give a single png file with format:
+        {pdf_filename}-{page_number}.png
+
+        The function removes the alpha channel from the image and
+        replace it with a white background.
+    """
+    non_overlap = max_length * (1 - overlap_ratio)
+    overlap = max_length * overlap_ratio
+    (path, file) = os.path.split(filename)
+    (name, ext) = os.path.splitext(file)
+    assert(ext == '.png')
+    ret = []
+
+    with Image(filename=filename) as img:
+        (width, height) = img.size
+        if height <= max_length:
+            return None
+
+        parts = [i for i in range(0, height, non_overlap)]
+        for i, part_y0 in enumerate(parts):
+            if (height - part_y0) <= overlap:
+                continue
+            part_y1 = min(height, part_y0 + max_length)
+            # [left:right, top:bottom]
+            with img[:, part_y0:part_y1] as cropped:
+                image_filename = '{}-{}.png'.format(name, chr(ord('a') + i))
+                image_filename = os.path.join(path, image_filename)
+                cropped.save(filename=image_filename)
+                ret.append(image_filename)
+    return ret
+
+
+
+    def convert_to(folder, source, timeout=None):
+    args = [libreoffice_exec(), '--headless', '--convert-to', 'pdf', '--outdir', folder, source]
+
+    process = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
+    filename = re.search('-> (.*?) using filter', process.stdout.decode())
+
+    if filename is None:
+        raise LibreOfficeError(process.stdout.decode())
+    else:
+        return filename.group(1)
+
+
+def libreoffice_exec():
+    # TODO: Provide support for more platforms
+    if sys.platform == 'darwin':
+        return '/Applications/LibreOffice.app/Contents/MacOS/soffice'
+    return 'libreoffice'
+
+
+def should_use(i, page_min, page_percent):
+    """ Algorithm to randomly pick pages from a pdf to convert.
+        Picks Y percent of pages after the first X is reached.
+    """
+    if i < page_min:
+        return True
+    p = random.random()
+    return p < (page_percent / 100.0)
 
 
 def remove_ext(filename):
@@ -46,7 +173,7 @@ def remove_ext(filename):
 
 
 def pdf_splitter(path):
-    fname = remove_ext(path)
+    fname = os.path.splitext(path)[0]
     pdf = PdfFileReader(path)
     num_digits = len(str(pdf.getNumPages()))
 

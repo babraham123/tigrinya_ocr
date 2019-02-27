@@ -17,9 +17,8 @@ cd ..
 sudo python3 demo.py 
 cd ..
 
-mkdir segment && cd segment
-mkdir images
-mkdir labels
+sudo apt-get update
+sudo apt-get install libreoffice
 
 
 # train_config.json
