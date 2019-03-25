@@ -4,7 +4,7 @@
 # python lib to handle drawing and file conversion tasks.
 # ref: http://docs.wand-py.org/en/0.5.0/guide/draw.html
 
-import glob, json, os, random, math, subprocess
+import glob, json, os, random, subprocess
 from wand.image import Image
 from wand.color import Color
 from wand.drawing import Drawing
@@ -12,6 +12,10 @@ from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
 
 
 def convert_to_png(img_file, output_path, resolution=300):
+    """ Converts a number of file formats into png images.
+
+        Supports pdf, doc, jpg, tif.
+    """
     (name, ext) = os.path.splitext(img_file)
     ext = ext.lower()
     ret = None
@@ -59,7 +63,7 @@ def pdf_to_png(filename, output_path='.', max_pages=None, resolution=300):
     if not max_pages or num_pages <= max_pages:
         selected = [i for i in range(num_pages)]
     else:
-        inc = math.floor(num_pages / max_pages)
+        inc = num_pages // max_pages
         selected = [i for i in range(0, num_pages, inc)]
 
     # for i, page in enumerate(all_pages.sequence):
@@ -79,9 +83,6 @@ def pdf_to_png(filename, output_path='.', max_pages=None, resolution=300):
 
 def img_to_png(filename, output_path='.', resolution=300):
     """ Convert any supported image format into png.
-
-        All the pages will give a single png file with format:
-        {pdf_filename}-{page_number}.png
 
         The function removes the alpha channel from the image and
         replace it with a white background.

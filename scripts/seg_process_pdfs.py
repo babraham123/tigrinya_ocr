@@ -13,12 +13,12 @@ max_length_ = 11 * dpi_  # inches
 
 
 def main():
-    pdf_dir = sys.argv[1]
-    image_dir = sys.argv[2]
-
     if len(sys.argv) != 3:
         print('Incorrect arguments!')
         exit()
+
+    pdf_dir = sys.argv[1]
+    image_dir = sys.argv[2]
     if not os.path.isdir(image_dir) or not os.path.isdir(pdf_dir):
         print('Folder(s) do not exist!')
         exit()
