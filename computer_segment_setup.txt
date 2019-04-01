@@ -22,10 +22,13 @@ sudo apt-get install libreoffice
 
 mkdir train
 mkdir eval_1
-python3 ../../tigrinya_ocr/scripts/crawler.py train/
+python3 ../../tigrinya_ocr/scripts/crawler.py
+python3 ../../tigrinya_ocr/scripts/crawler.py train/ 100
 cd train
 sh ../../tigrinya_ocr/scripts/mv_every_x.sh ../eval_1/ 10
 cd ..
+mkdir masks
+python3 ../../tigrinya_ocr/scripts/convert_via.py
 
 # configure train_config.json
 # 6GB RAM at least needed for gpu training
