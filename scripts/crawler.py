@@ -10,13 +10,17 @@
 # sudo apt-get install python-bs4
 # sudo pip3 install beautifulsoup4
 
-import urllib2, csv, requests, sys, os.path
+import csv, requests, sys, os.path
 from bs4 import BeautifulSoup
 from datetime import datetime
 try:
     from urllib.parse import urlsplit
 except ImportError:
     from urlparse import urlsplit
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
 
 # omit www.
 main_urls = [
@@ -47,7 +51,7 @@ def parse_url(url):
 
     visited_urls[url] = True
     try:
-        page = urllib2.urlopen(url)
+        page = urlopen(url)
         soup = BeautifulSoup(page, 'html.parser')
     except:
         return []

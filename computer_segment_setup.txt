@@ -24,6 +24,9 @@ mkdir train
 mkdir eval_1
 python3 ../../tigrinya_ocr/scripts/crawler.py
 python3 ../../tigrinya_ocr/scripts/crawler.py train/ 100
+
+# annotate images using VIA
+
 cd train
 sh ../../tigrinya_ocr/scripts/mv_every_x.sh ../eval_1/ 10
 cd ..
@@ -35,7 +38,8 @@ python3 ../../tigrinya_ocr/scripts/convert_via.py
 https://github.com/dhlab-epfl/dhSegment/blob/master/demo/demo_config.json
 
 # classes.txt
-0 0 0
-255 0 0
-
-
+# Create a class color for each region type + background
+python3 train.py with ../../tigrinya_ocr/segment/train_config.json
+cd demo
+tensorboard --logdir .
+cd ..
