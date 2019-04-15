@@ -30,7 +30,6 @@ main_urls = [
 domain = ''
 path = '/'
 output_csv = 'newspaper_urls.csv'
-output_dir = ''
 # ordered sets, ignore dict value
 pdf_urls = {}
 visited_urls = {}
@@ -67,6 +66,9 @@ def parse_url(url):
         try:
             link_parts = urlsplit(link_url)
         except:
+            continue
+
+        if not link_url or not link_parts:
             continue
 
         if link_parts.path.endswith('.pdf'):
@@ -125,12 +127,13 @@ def extract_time(path):
         return blank
 
 
-def download_pdf_file(url, index, num_urls):
+def download_pdf_file(url, index, num_urls, output_dir):
     parts = urlsplit(url)
     prefix = extract_time(parts.path)
     base_name = os.path.splitext(os.path.basename(parts.path))[0]
     filename = str(index).zfill(len(str(num_urls))) + '_' + prefix + '_' + base_name + '.pdf'
     filename = os.path.join(output_dir, filename)
+    print(filename)
 
     r = requests.get(url, stream=True)
     with open(filename, 'wb') as fd:
@@ -176,17 +179,17 @@ def download(output_dir, num_pdfs):
     increment = num_urls // num_pdfs
     for i in range(0, num_urls, increment):
         try:
-            download_pdf_file(url, i, num_urls)
+            download_pdf_file(urls[i], i, num_urls, output_dir)
             j += 1
         except:
             continue
-        print('Number of pdfs downloaded: ', j)
+    print('Number of pdfs downloaded: ', j)
 
 
 def main():
     if len(sys.argv) == 3:
         output_dir = sys.argv[1]
-        num_pdfs = sys.argv[2]
+        num_pdfs = int(sys.argv[2])
         if not os.path.isdir(output_dir):
             print('Folder doesnt exist!')
             exit()
