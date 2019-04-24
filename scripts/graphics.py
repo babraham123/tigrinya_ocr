@@ -27,8 +27,9 @@ def convert_to_png(filename, output_path, max_pages=None, resolution=300):
         # print('Converted: ', filename)
     elif ext in ['.doc', '.docx', '.txt']:
         pdf = doc_to_pdf(filename, output_path=output_path)
-        ret = pdf_to_png(pdf, output_path=output_path, max_pages=max_pages, resolution=resolution)
-        os.remove(pdf)
+        if pdf:
+            ret = pdf_to_png(pdf, output_path=output_path, max_pages=max_pages, resolution=resolution)
+            os.remove(pdf)
     else:
         print('unknown file type: ', filename)
     return ret
