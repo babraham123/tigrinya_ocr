@@ -4,44 +4,34 @@
 # python lib to handle drawing and file conversion tasks.
 # ref: http://docs.wand-py.org/en/0.5.0/guide/draw.html
 
-import glob, json, os, random, subprocess
+import glob, json, os, random, subprocess, re
 from wand.image import Image
 from wand.color import Color
 from wand.drawing import Drawing
 from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
 
 
-def convert_to_png(img_file, output_path, max_pages=None, resolution=300):
+def convert_to_png(filename, output_path, max_pages=None, resolution=300):
     """ Converts a number of file formats into png images.
 
         Supports pdf, doc, jpg, tif, txt(?).
     """
-    (name, ext) = os.path.splitext(img_file)
+    (name, ext) = os.path.splitext(filename)
     ext = ext.lower()
     ret = None
     if ext == '.pdf':
-        ret = pdf_to_png(img_file, output_path=output_path, max_pages=max_pages, resolution=resolution)
-        # print('Converted: ', img_file)
+        ret = pdf_to_png(filename, output_path=output_path, max_pages=max_pages, resolution=resolution)
+        # print('Converted: ', filename)
     elif ext in ['.png', '.jpg', '.jpeg', '.tif', '.tiff']:
-        ret = img_to_png(img_file, output_path=output_path, resolution=resolution)
-        # print('Converted: ', img_file)
+        ret = img_to_png(filename, output_path=output_path, resolution=resolution)
+        # print('Converted: ', filename)
     elif ext in ['.doc', '.docx', '.txt']:
-        pdf = doc_to_pdf(img_file, output_path=output_path)
+        pdf = doc_to_pdf(filename, output_path=output_path)
         ret = pdf_to_png(pdf, output_path=output_path, max_pages=max_pages, resolution=resolution)
         os.remove(pdf)
     else:
-        print('unknown file type: ', img_file)
+        print('unknown file type: ', filename)
     return ret
-
-def doc_to_pdf(filename, output_path='.'):
-    args = ['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', output_path, filename]
-    base_name = os.path.splitext(os.path.basename(filename))[0]
-    try:
-        subprocess.run(args, check=True) # shell=True
-        return os.path.join(output_path, base_name + '.pdf')
-    except Exception as ex:
-        print(ex)
-        return None
 
 
 def pdf_to_png(filename, output_path='.', max_pages=None, resolution=300):
@@ -136,24 +126,31 @@ def slice_img(filename, max_length, overlap_ratio):
     return ret
 
 
-
-    def convert_to(folder, source, timeout=None):
-    args = [libreoffice_exec(), '--headless', '--convert-to', 'pdf', '--outdir', folder, source]
-
-    process = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
-    filename = re.search('-> (.*?) using filter', process.stdout.decode())
+def doc_to_pdf(folder, source, timeout=None):
+    args = ['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', folder, source]
+    try:
+        process = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
+        filename = re.search('-> (.*?) using filter', process.stdout.decode())
+    except Exception as ex:
+        print(ex)
+        return None
 
     if filename is None:
-        raise LibreOfficeError(process.stdout.decode())
+        print(process.stdout.decode())
+        return None
     else:
         return filename.group(1)
 
 
-def libreoffice_exec():
-    # TODO: Provide support for more platforms
-    if sys.platform == 'darwin':
-        return '/Applications/LibreOffice.app/Contents/MacOS/soffice'
-    return 'libreoffice'
+def doc_to_pdf2(filename, output_path='.'):
+    args = ['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', output_path, filename]
+    base_name = os.path.splitext(os.path.basename(filename))[0]
+    try:
+        subprocess.run(args, check=True) # shell=True
+        return os.path.join(output_path, base_name + '.pdf')
+    except Exception as ex:
+        print(ex)
+        return None
 
 
 def should_use(i, page_min, page_percent):
