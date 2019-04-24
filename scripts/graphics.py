@@ -100,8 +100,8 @@ def slice_img(filename, max_length, overlap_ratio):
         The function removes the alpha channel from the image and
         replace it with a white background.
     """
-    non_overlap = max_length * (1 - overlap_ratio)
-    overlap = max_length * overlap_ratio
+    non_overlap = int(max_length * (1 - overlap_ratio))
+    overlap = int(max_length * overlap_ratio)
     (path, file) = os.path.split(filename)
     (name, ext) = os.path.splitext(file)
     ext = ext.lower()

@@ -40,7 +40,7 @@ def main():
     print('slice and binarize...')
     final_imgs = []
     for file in glob.glob(os.path.join(image_dir, '*.png')):
-        result = slice_img(file, max_length_, 0.8)
+        result = slice_img(file, max_length_, 0.2)
         print(result)
         if not result:
             result = [file]
