@@ -21,12 +21,23 @@ sudo apt-get update
 sudo apt-get install libreoffice
 
 mkdir train
-mkdir eval_1
+mkdir eval
+mkdir data
+# download newspapers
 python3 ../../tigrinya_ocr/scripts/crawler.py
-python3 ../../tigrinya_ocr/scripts/crawler.py train/ 100
+python3 ../../tigrinya_ocr/scripts/crawler.py data/ 50
+# download saved files from google drive
+cd data
+gdrive download --recursive <folder_id>
+
+# convert
+cd .. && mkdir images
+python3 ../../tigrinya_ocr/scripts/seg_process_pdfs.py data/ images/
 
 # annotate images using VIA
+mkdir labels
 
+# transfer 1/10th of the data to eval
 cd train
 sh ../../tigrinya_ocr/scripts/mv_every_x.sh ../eval_1/ 10
 cd ..

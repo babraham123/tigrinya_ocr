@@ -10,6 +10,7 @@ import os, sys, glob, subprocess
 dpi_ = 100 # pixels per inch
 max_length_ = 11 * dpi_  # inches
 # typical page is 8.5 x 11in
+max_pages_ = 15
 
 
 def main():
@@ -30,7 +31,7 @@ def main():
             file = os.path.join(root, filename)
             if not os.path.isfile(file):
                 continue
-            result = convert_to_png(file, image_dir, 10, dpi_)
+            result = convert_to_png(file, image_dir, max_pages_, dpi_)
             print(result)
 
     # binarize pngs

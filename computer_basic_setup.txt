@@ -22,7 +22,7 @@ vncserver
 vncserver -kill :1
 # on Mac
 open Screen Share
-vnc://192.168.50.59:5901
+vnc://babraham-Vostro-260:5901
 
 Aliases::
 vi ~/.bash_aliases

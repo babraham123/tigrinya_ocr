@@ -11,23 +11,23 @@ from wand.drawing import Drawing
 from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
 
 
-def convert_to_png(img_file, output_path, resolution=300):
+def convert_to_png(img_file, output_path, max_pages=None, resolution=300):
     """ Converts a number of file formats into png images.
 
-        Supports pdf, doc, jpg, tif.
+        Supports pdf, doc, jpg, tif, txt(?).
     """
     (name, ext) = os.path.splitext(img_file)
     ext = ext.lower()
     ret = None
     if ext == '.pdf':
-        ret = pdf_to_png(img_file, output_path=output_path, resolution=resolution)
-        print('Converted: ', img_file)
+        ret = pdf_to_png(img_file, output_path=output_path, max_pages=max_pages, resolution=resolution)
+        # print('Converted: ', img_file)
     elif ext in ['.png', '.jpg', '.jpeg', '.tif', '.tiff']:
         ret = img_to_png(img_file, output_path=output_path, resolution=resolution)
-        print('Converted: ', img_file)
-    elif ext in ['.doc', '.docx']:
+        # print('Converted: ', img_file)
+    elif ext in ['.doc', '.docx', '.txt']:
         pdf = doc_to_pdf(img_file, output_path=output_path)
-        ret = pdf_to_png(pdf, output_path=output_path, resolution=resolution)
+        ret = pdf_to_png(pdf, output_path=output_path, max_pages=max_pages, resolution=resolution)
         os.remove(pdf)
     else:
         print('unknown file type: ', img_file)
