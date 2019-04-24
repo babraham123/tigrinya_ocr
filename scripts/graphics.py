@@ -104,13 +104,14 @@ def slice_img(filename, max_length, overlap_ratio):
     overlap = max_length * overlap_ratio
     (path, file) = os.path.split(filename)
     (name, ext) = os.path.splitext(file)
+    ext = ext.lower()
     assert(ext == '.png')
     ret = []
 
     with Image(filename=filename) as img:
         (width, height) = img.size
         if height <= max_length:
-            return None
+            return [filename]
 
         parts = [i for i in range(0, height, non_overlap)]
         for i, part_y0 in enumerate(parts):
