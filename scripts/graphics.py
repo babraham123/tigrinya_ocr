@@ -128,31 +128,23 @@ def slice_img(filename, max_length, overlap_ratio):
     return ret
 
 
-def doc_to_pdf(folder, source, timeout=None):
-    args = ['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', folder, source]
+def doc_to_pdf(filename, output_path='.', timeout=None):
+    args = ['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', output_path, filename]
     try:
         process = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
-        filename = re.search('-> (.*?) using filter', process.stdout.decode())
+        regex = re.search('-> (.*?) using filter', process.stdout.decode())
     except Exception as ex:
         print(ex)
         return None
 
-    if filename is None:
+    # or instead of regex
+    # base_name = os.path.splitext(os.path.basename(filename))[0]
+    # return os.path.join(output_path, base_name + '.pdf')
+    if regex is None:
         print(process.stdout.decode())
         return None
     else:
-        return filename.group(1)
-
-
-def doc_to_pdf2(filename, output_path='.'):
-    args = ['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', output_path, filename]
-    base_name = os.path.splitext(os.path.basename(filename))[0]
-    try:
-        subprocess.run(args, check=True) # shell=True
-        return os.path.join(output_path, base_name + '.pdf')
-    except Exception as ex:
-        print(ex)
-        return None
+        return regex.group(1)
 
 
 def should_use(i, page_min, page_percent):
@@ -163,13 +155,6 @@ def should_use(i, page_min, page_percent):
         return True
     p = random.random()
     return p < (page_percent / 100.0)
-
-
-def remove_ext(filename):
-    parts = filename.split('.')
-    if len(parts) < 2:
-        return filename, ''
-    return '.'.join(parts[:-1])
 
 
 def pdf_splitter(path):
