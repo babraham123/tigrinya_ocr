@@ -13,12 +13,10 @@ from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.colors import black
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont 
+import sys
 
-filename_in = '../raw_data/corpus.txt'
-filename_out = '../tesseract/eval/tir_testdata.pdf'
-filename_txt = '../tesseract/eval/tir_groundtruth.txt'
 fontDir = '/Users/babraham/Library/Fonts/'
-lines_per_page = 25
+lines_per_page = 50
 
 fonts = {
     'Abyssinica SIL': 'AbyssinicaSIL-R.ttf',
@@ -42,7 +40,7 @@ fonts = {
 
 max_fonts = len(fonts)
 
-def main():
+def create_pdf(filename_in, filename_out, filename_txt):
     for f1 in fonts:
         pdfmetrics.registerFont(TTFont(f1, fontDir + fonts[f1]))
 
@@ -73,7 +71,7 @@ def main():
         line = content[i % len(content)]
         groundtruth = groundtruth + line + u'\n'
         story.append(Paragraph(line.encode('utf-8'), styles['Ethiopic_i']))
-        story.append(Spacer(inch * 0.1, inch * 0.1))
+        story.append(Spacer(inch * 0.05, inch * 0.05))
         if i > 0 and i % lines_per_page == 0:
             groundtruth = groundtruth + u'\n'
             story.append(PageBreak())
@@ -89,4 +87,13 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 4:
+        print('Incorrect arguments!')
+        exit()
+
+    filename_in = sys.argv[1]
+    filename_out = sys.argv[2]
+    filename_txt = sys.argv[3]
+    
+    create_pdf(filename_in, filename_out, filename_txt)
+
