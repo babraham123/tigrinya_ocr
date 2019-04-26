@@ -15,7 +15,8 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont 
 import sys
 
-fontDir = '/Users/babraham/Library/Fonts/'
+# font_dir = '/Users/babraham/Library/Fonts/'
+font_dir = '/home/babraham/tigrinya_ocr/fonts/'
 lines_per_page = 50
 
 fonts = {
@@ -42,7 +43,7 @@ max_fonts = len(fonts)
 
 def create_pdf(filename_in, filename_out, filename_txt):
     for f1 in fonts:
-        pdfmetrics.registerFont(TTFont(f1, fontDir + fonts[f1]))
+        pdfmetrics.registerFont(TTFont(f1, font_dir + fonts[f1]))
 
     with open(filename_in) as f:
         content = f.readlines()
