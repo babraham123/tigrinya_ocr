@@ -5,12 +5,21 @@
 # sudo apt-get install libreoffice
 
 from graphics import *
-import os, sys, glob, subprocess
+import os, sys, glob, subprocess, re
 
 dpi_ = 100 # pixels per inch
 max_length_ = 11 * dpi_  # inches
 # typical page is 8.5 x 11in
 max_pages_ = 15
+
+
+def does_image_exist(filename, existing_images):
+    (name, _) = os.path.splitext(filename)
+    regex = re.compile(name + '-[\d]+\.png')
+    for img_file in existing_images:
+        if regex.match(img_file):
+            return True
+    return False
 
 
 def main():
@@ -26,6 +35,8 @@ def main():
 
     # walk thru pdf directory
     print('conversion...')
+    existing_images = glob.glob(os.path.join(image_dir, '*.png'))
+    existing_images = [os.path.basename(f) for f in existing_images]
     num_inputs = 0
     for root, dirs, files in os.walk(pdf_dir):
         for filename in files:
@@ -33,6 +44,8 @@ def main():
             if not os.path.isfile(file):
                 continue
             num_inputs += 1
+            if does_image_exist(filename, existing_images):
+                continue
             result = convert_to_png(file, image_dir, max_pages_, dpi_)
             print(result)
 
