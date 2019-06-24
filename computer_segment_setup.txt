@@ -29,10 +29,16 @@ python3 ../tigrinya_ocr/scripts/crawler.py data/ 50
 # download saved files from google drive
 cd data
 gdrive download --recursive <folder_id>
+# generate corpus pdf (python2.7)
+mkdir generated
+cd ..
+python ../tigrinya_ocr/scripts/create_pdf.py ../kraken/corpus/full_corpus.txt data/generated/corpus.pdf /dev/null
 
 # convert
-cd .. && mkdir images
-python3 ../tigrinya_ocr/scripts/seg_process_pdfs.py data/ images/
+mkdir images
+mkdir logs
+screen
+python3 ../tigrinya_ocr/scripts/seg_process_pdfs.py data/ images/ &> logs/convert.log
 
 # annotate images using VIA
 mkdir labels

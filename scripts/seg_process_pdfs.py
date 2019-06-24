@@ -13,6 +13,17 @@ max_length_ = 11 * dpi_  # inches
 max_pages_ = 15
 
 
+def find_existing_imgs(image_dir):
+    images = glob.glob(os.path.join(image_dir, '*.png'))
+    existing_images = {}
+    for img in images:
+        name = os.path.basename(img)
+        parts = name.split('-')
+        name = '-'.join(parts[:-1])
+        existing_images[name] = True
+    return existing_images
+
+
 def main():
     if len(sys.argv) != 3:
         print('Incorrect arguments!')
@@ -26,6 +37,7 @@ def main():
 
     # walk thru pdf directory
     print('conversion...')
+    existing_images = find_existing_imgs(image_dir)
     num_inputs = 0
     for root, dirs, files in os.walk(pdf_dir):
         for filename in files:
@@ -33,6 +45,9 @@ def main():
             if not os.path.isfile(file):
                 continue
             num_inputs += 1
+            (name, _) = os.path.splitext(filename)
+            if name in existing_images:
+                continue
             result = convert_to_png(file, image_dir, max_pages_, dpi_)
             print(result)
 
