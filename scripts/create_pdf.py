@@ -17,7 +17,7 @@ import sys
 
 # font_dir = '/Users/babraham/Library/Fonts/'
 font_dir = '/home/babraham/tigrinya_ocr/fonts/'
-lines_per_page = 50
+lines_per_page = 40
 
 fonts = {
     'Abyssinica SIL': 'AbyssinicaSIL-R.ttf',
@@ -55,7 +55,7 @@ def create_pdf(filename_in, filename_out, filename_txt):
         name='Ethiopic',
         fontName='Abyssinica SIL',
         fontSize=12,
-        leading=14,
+        leading=12,
         firstLineIndent=0,
         alignment=TA_LEFT,
         textColor=black,
@@ -72,7 +72,7 @@ def create_pdf(filename_in, filename_out, filename_txt):
         line = content[i % len(content)]
         groundtruth = groundtruth + line + u'\n'
         story.append(Paragraph(line.encode('utf-8'), styles['Ethiopic_i']))
-        story.append(Spacer(inch * 0.05, inch * 0.05))
+        story.append(Spacer(inch * 0.025, inch * 0.025))
         if i > 0 and i % lines_per_page == 0:
             groundtruth = groundtruth + u'\n'
             story.append(PageBreak())
