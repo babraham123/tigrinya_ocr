@@ -7,7 +7,7 @@
 from graphics import *
 import os, sys, glob, subprocess
 
-dpi_ = 100 # pixels per inch
+dpi_ = 200 # pixels per inch
 max_length_ = 11 * dpi_  # inches
 # typical page is 8.5 x 11in
 max_pages_ = 15

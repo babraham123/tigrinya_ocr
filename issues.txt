@@ -1,3 +1,7 @@
+Segmentation Issues::
+1. Generating data is slow and manual. Using mechanical turk to speed up the process.
+2.
+
 Calamari Issues::
 1. tensorflow doesn't detect GPU. Install by binary version only works with compute compatability level 3.5, not 3.0 for geforce 650. Solution was to build from source. 
 https://github.com/tensorflow/tensorflow/issues/17445

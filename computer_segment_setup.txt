@@ -37,9 +37,36 @@ python ../tigrinya_ocr/scripts/create_pdf.py ../kraken/corpus/full_corpus.txt da
 # convert
 mkdir images
 mkdir logs
-screen
+# remove massive files
+du -ah ~/segment/data | sort -rh
 python3 ../tigrinya_ocr/scripts/seg_process_pdfs.py data/ images/ &> logs/convert.log
 
+# serve images
+sudo apt-get install samba
+sudo vi /etc/samba/smb.conf
+sudo service smbd restart
+sudo smbpasswd -a babraham
+sudo chmod +rw -R /home/babraham/segment/images
+# on MacOS, click "Go > Connect to Server"
+smb://ip-address/segmentimagesvia
+
+sudo apt-get install nginx
+sudo chmod 755 -R /home/babraham/segment/images
+sudo vi /etc/nginx/conf.d/segment.conf
+server {
+    listen       8001;          # a customed port
+
+    # download
+    autoindex on;               # enable directory listing output
+    autoindex_exact_size off;   # output file sizes rounded to kilobytes, megabytes, and gigabytes
+    autoindex_localtime on;     # output local times in the directory
+
+    location / {
+        root /home/babraham/segment/images;
+    }
+}
+sudo nginx -s reload
+sudo service nginx restart
 # annotate images using VIA
 mkdir labels
 

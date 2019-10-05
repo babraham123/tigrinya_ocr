@@ -1,0 +1,36 @@
+MTurk
+
+target wage: $15/hr
+newspapers: $1 / page
+other text and cutoff newspaper: $.25 / page
+easy book pages: $.1 / page
+
+Amazon adds an additional 25% fee
+
+100 newspapers + 240 text + 400 pages => $250
+
+Determine how much training data is needed. Select data and bin.
+
+
+Template
+Draw bounding boxes around blocks of text and images. Ignore other elements.
+Tool Guide is all set.
+Full instructions: everything except for #5 (avoid shadows).
+Labels: Text, Image, 
+
+Should the title / heading be a different type? No, not different enough
+Separate blocks for title / heading?
+Should a single text block include different fonts? 
+Ignore unusual elements, or create an Other label? Ignore
+Should text blocks span page breaks? No. Span paragraphs? Yes
+Label for ornaments?
+
+Perform line detection? Probably way more efficient but more expensive
+To generate test data: manually annotate text blocks, use kraken to detect lines, and finally manually correct. 
+Gold standard is 2000 pages.
+
+Colored backgrounds and text in images are out of scope for now.
+
+What does mturk ouput look like?
+Script to quickly visualize boxes on text.
+Script to visualize kraken segmentation.
