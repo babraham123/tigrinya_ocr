@@ -18,7 +18,7 @@ multiplier = 4
 # minecart's native dpi is 72 for all coordinates
 def normalize_bbox(bbox):
     # left, bottom, right, top
-    return [bbox[0]/multiplier, bbox[1]/multiplier, bbox[2]/multiplier, bbox[3]/multiplier]
+    return [bbox[0]*multiplier, bbox[1]*multiplier, bbox[2]*multiplier, bbox[3]*multiplier]
 
 def main():
     if len(sys.argv) < 2:
@@ -39,13 +39,13 @@ def main():
         print('File is not a pdf!')
         exit()
 
-    img_pages = pdf_to_png(image_file, output_path=output_dir, resolution=72*multiplier)
+    img_pages = pdf_to_png(pdf_name, output_path=output_dir, resolution=72*multiplier)
     print('Converted to png.')
 
     pdf_file = open(pdf_name, 'rb')
     doc = minecart.Document(pdf_file)
     # page = doc.get_page(0)
-
+    fonts = {}
     for i, page in enumerate(doc.iter_pages()):
         images = []
         shapes = []
@@ -60,7 +60,8 @@ def main():
             texts.append(normalize_bbox(text.get_bbox()))
 
         for shape in page.shapes:
-            shapes.append(normalize_bbox(shape.path.get_bbox()))
+            # shape.path -> segments
+            shapes.append(normalize_bbox(shape.get_bbox()))
 
         draw_boxes(img_pages[i], shapes, color='yellow')
         draw_boxes(img_pages[i], images, color='green')
