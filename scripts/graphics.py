@@ -213,10 +213,10 @@ def read_kraken_bboxes(filename):
     return boxes
 
 
-def draw_boxes(filename, boxes):
+def draw_boxes(filename, boxes, color='red'):
     with Drawing() as draw:
         draw.stroke_width = 2
-        draw.stroke_color = Color('red')
+        draw.stroke_color = Color(color)
         draw.fill_color = Color('white')
         draw.fill_opacity = 0
         for box in boxes:
