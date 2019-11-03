@@ -48,8 +48,11 @@ def main():
             (name, _) = os.path.splitext(filename)
             if name in existing_images:
                 continue
-            result = convert_to_png(file, image_dir, max_pages_, dpi_)
-            print(result)
+            try:
+                result = convert_to_png(file, image_dir, max_pages_, dpi_)
+                print(result)
+            except Exception as ex:
+                print(ex)
 
     # binarize pngs
     print('slice and binarize...')
