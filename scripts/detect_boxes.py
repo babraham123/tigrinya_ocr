@@ -55,9 +55,10 @@ def main():
             bbox = [text.x0, text.y0, text.x1, text.y1]
             lines.append(normalize_bbox(bbox, size))
 
-        for obj in page.objects:
-            if obj.object_type not in ['rect', 'curve']:
-                continue
+        for obj in page.rects:
+            bbox = [obj.x0, obj.y0, obj.x1, obj.y1]
+            shapes.append(normalize_bbox(bbox, size))
+        for obj in page.curves:
             bbox = [obj.x0, obj.y0, obj.x1, obj.y1]
             shapes.append(normalize_bbox(bbox, size))
 
