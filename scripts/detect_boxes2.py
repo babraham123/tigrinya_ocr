@@ -2,21 +2,22 @@
 # -*- coding: utf-8 -*-
 
 # python script to detect text blocks in pdfs
-# pip install minecart --user
+# pip install pdfplumber --user
 # example:
 #  python ~/tigrinya_ocr/scripts/detect_boxes.py source.pdf output_dir
 #    ~/tigrinya_ocr/raw_data/Tigrigna-Grammar-i-vs-e.pdf
 #    ~/segment/generated
 
 from graphics import *
-import minecart
+import pdfplumber
 import os.path
 import sys
 
 multiplier = 4
+def_res = 72
+# pdfplumber's native dpi is 72 for all coordinates
 
-# minecart's native dpi is 72 for all coordinates
-def normalize_bbox(bbox):
+def normalize_bbox(bbox, size):
     # left, bottom, right, top
     return [bbox[0]*multiplier, bbox[1]*multiplier, bbox[2]*multiplier, bbox[3]*multiplier]
 
@@ -39,38 +40,40 @@ def main():
         print('File is not a pdf!')
         exit()
 
-    img_pages = pdf_to_png(pdf_name, output_path=output_dir, resolution=72*multiplier)
+    img_pages = pdf_to_png(pdf_name, output_path=output_dir, resolution=def_res*multiplier)
     print('Converted to png.')
 
-    pdf_file = open(pdf_name, 'rb')
-    doc = minecart.Document(pdf_file)
-    # page = doc.get_page(0)
+    pdf = pdfplumber.open(pdf_name)
+    print(pdf.metadata)
     fonts = {}
-    for i, page in enumerate(doc.iter_pages()):
-        images = []
+    for page in pdf.pages:
+        i = page.page_number - 1
+        size = [page.width, page.height]
+
+        print(i)
+        print(size)
+        print(page.extract_text(x_tolerance=100)[0])
+
+        lines = []
         shapes = []
-        texts = []
+        for text in page.lines:
+            bbox = [text.x0, text.y0, text.x1, text.y1]
+            lines.append(normalize_bbox(bbox, size))
 
-        for image in page.images:
-            # im = image.as_pil()  # requires pillow
-            images.append(normalize_bbox(image.get_bbox()))
-
-        for text in page.letterings:
-            fonts[text.font] = 1
-            texts.append(normalize_bbox(text.get_bbox()))
-
-        for shape in page.shapes:
-            # shape.path -> segments
-            shapes.append(normalize_bbox(shape.get_bbox()))
+        for obj in page.rects:
+            bbox = [obj['x0'], obj['y0'], obj['x1'], obj['y1']]
+            shapes.append(normalize_bbox(bbox, size))
+        for obj in page.curves:
+            bbox = [obj['x0'], obj['y0'], obj['x1'], obj['y1']]
+            shapes.append(normalize_bbox(bbox, size))
 
         draw_boxes(img_pages[i], shapes, color='yellow')
-        draw_boxes(img_pages[i], images, color='green')
-        draw_boxes(img_pages[i], texts, color='red')
+        draw_boxes(img_pages[i], lines, color='red')
         print('Drew mined boxes for page %d.' % i)
-    
-    print(fonts.keys())
+
     print('Done!')
 
 
 if __name__ == '__main__':
     main()
+
