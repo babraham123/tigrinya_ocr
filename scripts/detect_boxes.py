@@ -34,11 +34,14 @@ def aggregate_bboxes(bboxes):
     new_bboxes = []
     bbox = bboxes[0]
     for i in range(len(bboxes) - 1):
-        if is_overlapped(bbox, bboxes[i+1], x_tol = 3):
+        if is_overlapped(bbox, bboxes[i+1], x_tol = 10):
             bbox = combine_bboxes(bbox, bboxes[i+1])
         else:
             new_bboxes.append(bbox)
             bbox = bboxes[i+1]
+
+    new_bboxes.append(bbox)
+    return new_bboxes
 
 def main():
     if len(sys.argv) < 2:
@@ -85,6 +88,7 @@ def main():
             shapes.append(normalize_bbox(shape.get_bbox(), size))
 
         lines = aggregate_bboxes(texts)
+        lines = aggregate_bboxes(lines)
 
         draw_boxes(img_pages[i], shapes, color='yellow')
         draw_boxes(img_pages[i], images, color='green')
