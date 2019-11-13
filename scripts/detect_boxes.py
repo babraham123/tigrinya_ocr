@@ -30,18 +30,59 @@ def is_overlapped(box_a, box_b, x_tol = 0, y_tol = 0):
 def combine_bboxes(box_a, box_b):
     return [min(box_a[0], box_b[0]), min(box_a[1], box_b[1]), max(box_a[2], box_b[2]), max(box_a[3], box_b[3])]
 
-def aggregate_bboxes(bboxes):
-    new_bboxes = []
-    bbox = bboxes[0]
-    for i in range(len(bboxes) - 1):
-        if is_overlapped(bbox, bboxes[i+1], x_tol = 10):
-            bbox = combine_bboxes(bbox, bboxes[i+1])
-        else:
-            new_bboxes.append(bbox)
-            bbox = bboxes[i+1]
+# def aggregate_bboxes(bboxes):
+#     new_bboxes = []
+#     bbox = bboxes[0]
+#     for i in range(len(bboxes) - 1):
+#         if is_overlapped(bbox, bboxes[i+1], x_tol = 10):
+#             bbox = combine_bboxes(bbox, bboxes[i+1])
+#         else:
+#             new_bboxes.append(bbox)
+#             bbox = bboxes[i+1]
 
-    new_bboxes.append(bbox)
-    return new_bboxes
+#     new_bboxes.append(bbox)
+#     return new_bboxes
+
+def aggregate_bboxes(bboxes, size):
+    # uses the Line Sweep algorithm to combine n rectangles
+    # left, bottom, right, top
+    lines = []
+    cur_intervals = []
+    size = [size[0]*multiplier, size[1]*multiplier]
+    bboxes.sort(key=lambda r:r[0])
+
+    j = 0
+    x = 0
+    while True:
+        # add new boxes based off of leading edge
+        while j < len(bboxes) and x == bboxes[j][0]:
+            cur_intervals.append(bboxes[j])
+            j = j + 1
+
+        # progressively aggregate boxes
+        cur_intervals.sort(key=lambda r:r[1])
+        new_bboxes = []
+        bbox = bboxes[0]
+        for i in range(len(cur_intervals) - 1):
+            if is_overlapped(bbox, cur_intervals[i+1], x_tol = 5):
+                bbox = combine_bboxes(bbox, cur_intervals[i+1])
+            else:
+                new_bboxes.append(bbox)
+                bbox = cur_intervals[i+1]
+        new_bboxes.append(bbox)
+        cur_intervals = new_bboxes
+
+        # remove boxes based off of the trailing edge
+        while x == cur_intervals[-1][2]:
+            lines.append(cur_intervals.pop())
+
+        x = x + 1
+        if j >= len(bboxes):
+            break
+
+    lines.extend(cur_intervals)
+    return lines
+
 
 def main():
     if len(sys.argv) < 2:
@@ -87,8 +128,9 @@ def main():
             # shape.path -> segments
             shapes.append(normalize_bbox(shape.get_bbox(), size))
 
-        lines = aggregate_bboxes(texts)
-        lines = aggregate_bboxes(lines)
+        print('%d text segments' % len(texts))
+        lines = aggregate_bboxes(texts, size)
+        print('%d lines of text' % len(lines))
 
         draw_boxes(img_pages[i], shapes, color='yellow')
         draw_boxes(img_pages[i], images, color='green')
