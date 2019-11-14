@@ -43,45 +43,62 @@ def combine_bboxes(box_a, box_b):
 #     new_bboxes.append(bbox)
 #     return new_bboxes
 
-def aggregate_bboxes(bboxes, size):
-    # uses the Line Sweep algorithm to combine n rectangles
-    # left, bottom, right, top
-    lines = []
-    cur_intervals = []
-    size = [size[0]*multiplier, size[1]*multiplier]
-    bboxes.sort(key=lambda r:r[0])
+# def aggregate_bboxes(bboxes, size):
+#     # uses the Line Sweep algorithm to combine n rectangles
+#     # left, bottom, right, top
+#     lines = []
+#     cur_intervals = []
+#     size = [size[0]*multiplier, size[1]*multiplier]
+#     bboxes.sort(key=lambda r:r[0])
 
-    j = 0
-    x = 0
-    while True:
-        # add new boxes based off of leading edge
-        while j < len(bboxes) and x == bboxes[j][0]:
-            cur_intervals.append(bboxes[j])
-            j = j + 1
+#     j = 0
+#     x = 0
+#     while True:
+#         # add new boxes based off of leading edge
+#         while j < len(bboxes) and x == bboxes[j][0]:
+#             cur_intervals.append(bboxes[j])
+#             j = j + 1
 
-        # progressively aggregate boxes
-        cur_intervals.sort(key=lambda r:r[1])
-        new_bboxes = []
-        bbox = bboxes[0]
-        for i in range(len(cur_intervals) - 1):
-            if is_overlapped(bbox, cur_intervals[i+1], x_tol = 5):
-                bbox = combine_bboxes(bbox, cur_intervals[i+1])
-            else:
-                new_bboxes.append(bbox)
-                bbox = cur_intervals[i+1]
+#         # progressively aggregate boxes
+#         cur_intervals.sort(key=lambda r:r[1])
+#         new_bboxes = []
+#         bbox = bboxes[0]
+#         for i in range(len(cur_intervals) - 1):
+#             if is_overlapped(bbox, cur_intervals[i+1], x_tol = 5):
+#                 bbox = combine_bboxes(bbox, cur_intervals[i+1])
+#             else:
+#                 new_bboxes.append(bbox)
+#                 bbox = cur_intervals[i+1]
+#         new_bboxes.append(bbox)
+#         cur_intervals = new_bboxes
+
+#         # remove boxes based off of the trailing edge
+#         while x == cur_intervals[-1][2]:
+#             lines.append(cur_intervals.pop())
+
+#         x = x + 1
+#         if j >= len(bboxes):
+#             break
+
+#     lines.extend(cur_intervals)
+#     return lines
+
+def aggregate_bboxes(bboxes):
+    new_bboxes = []
+    i = 0
+    while i < len(bboxes):
+        bbox = bboxes.pop(i)
+        for j in range(len(bboxes), -1, -1):
+            if is_overlapped(bbox, bboxes[j], x_tol = 2):
+                bbox = combine_bboxes(bbox, bboxes.pop(j))
+                if j < i:
+                    i = i - 1
+
         new_bboxes.append(bbox)
-        cur_intervals = new_bboxes
+        bboxes.insert(0, bbox)
+        i = i + 1
 
-        # remove boxes based off of the trailing edge
-        while x == cur_intervals[-1][2]:
-            lines.append(cur_intervals.pop())
-
-        x = x + 1
-        if j >= len(bboxes):
-            break
-
-    lines.extend(cur_intervals)
-    return lines
+    return new_bboxes
 
 
 def main():
