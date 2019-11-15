@@ -22,7 +22,7 @@ def normalize_bbox(bbox, size):
     # width, height
     return [bbox[0]*multiplier, (size[1] - bbox[1])*multiplier, bbox[2]*multiplier, (size[1] - bbox[3])*multiplier]
 
-def is_overlapped(box_a, box_b, x_tol = 0, y_tol = 0):
+def is_overlapped(box_a, box_b, x_tol=0, y_tol=0):
     # box = [x1, y1, x2, y2]
     box_a = [box_a[0] - x_tol, box_a[1] - y_tol, box_a[2] + x_tol, box_a[3] + y_tol]
     return box_a[2] >= box_b[0] and box_b[2] >= box_a[0] and box_a[3] >= box_b[1] and box_b[3] >= box_a[1]
@@ -32,10 +32,10 @@ def combine_bboxes(box_a, box_b):
 
 def combine_n_bboxes(bboxes):
     return [
-        min(bboxes, key=lambda b: b[0]),
-        min(bboxes, key=lambda b: b[1]),
-        max(bboxes, key=lambda b: b[2]),
-        max(bboxes, key=lambda b: b[3])
+        min(bboxes, key=lambda b: b[0])[0],
+        min(bboxes, key=lambda b: b[1])[1],
+        max(bboxes, key=lambda b: b[2])[2],
+        max(bboxes, key=lambda b: b[3])[3]
     ]
 
 def aggregate_bboxes(bboxes):
@@ -47,7 +47,7 @@ def aggregate_bboxes(bboxes):
     overlapping_boxes = set()
     for i in range(len(bboxes) - 1):
         for j in range(i + 1, len(bboxes)):
-            if is_overlapped(bboxes[i], bboxes[j], x_tol = 5):
+            if is_overlapped(bboxes[i], bboxes[j], x_tol=20, y_tol=20):
                 overlapping_boxes.add(i)
                 overlapping_boxes.add(j)
                 if i in overlapping:
@@ -72,7 +72,8 @@ def aggregate_bboxes(bboxes):
     new_bboxes = [bboxes[i] for i in single_boxes]
     for g in overlapping:
         if overlapping[g]:
-            bbox = combine_n_bboxes([bboxes[i] for i in overlapping[g]])
+            indices = overlapping[g] + [g]
+            bbox = combine_n_bboxes([bboxes[i] for i in indices])
             new_bboxes.append(bbox)
     return new_bboxes
 
