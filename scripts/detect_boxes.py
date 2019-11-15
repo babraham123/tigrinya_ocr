@@ -30,76 +30,66 @@ def is_overlapped(box_a, box_b, x_tol = 0, y_tol = 0):
 def combine_bboxes(box_a, box_b):
     return [min(box_a[0], box_b[0]), min(box_a[1], box_b[1]), max(box_a[2], box_b[2]), max(box_a[3], box_b[3])]
 
-# def aggregate_bboxes(bboxes):
-#     new_bboxes = []
-#     bbox = bboxes[0]
-#     for i in range(len(bboxes) - 1):
-#         if is_overlapped(bbox, bboxes[i+1], x_tol = 10):
-#             bbox = combine_bboxes(bbox, bboxes[i+1])
-#         else:
-#             new_bboxes.append(bbox)
-#             bbox = bboxes[i+1]
-
-#     new_bboxes.append(bbox)
-#     return new_bboxes
-
-# def aggregate_bboxes(bboxes, size):
-#     # uses the Line Sweep algorithm to combine n rectangles
-#     # left, bottom, right, top
-#     lines = []
-#     cur_intervals = []
-#     size = [size[0]*multiplier, size[1]*multiplier]
-#     bboxes.sort(key=lambda r:r[0])
-
-#     j = 0
-#     x = 0
-#     while True:
-#         # add new boxes based off of leading edge
-#         while j < len(bboxes) and x == bboxes[j][0]:
-#             cur_intervals.append(bboxes[j])
-#             j = j + 1
-
-#         # progressively aggregate boxes
-#         cur_intervals.sort(key=lambda r:r[1])
-#         new_bboxes = []
-#         bbox = bboxes[0]
-#         for i in range(len(cur_intervals) - 1):
-#             if is_overlapped(bbox, cur_intervals[i+1], x_tol = 5):
-#                 bbox = combine_bboxes(bbox, cur_intervals[i+1])
-#             else:
-#                 new_bboxes.append(bbox)
-#                 bbox = cur_intervals[i+1]
-#         new_bboxes.append(bbox)
-#         cur_intervals = new_bboxes
-
-#         # remove boxes based off of the trailing edge
-#         while x == cur_intervals[-1][2]:
-#             lines.append(cur_intervals.pop())
-
-#         x = x + 1
-#         if j >= len(bboxes):
-#             break
-
-#     lines.extend(cur_intervals)
-#     return lines
+def combine_n_bboxes(bboxes):
+    return [
+        min(bboxes, key=lambda b: b[0]),
+        min(bboxes, key=lambda b: b[1]),
+        max(bboxes, key=lambda b: b[2]),
+        max(bboxes, key=lambda b: b[3])
+    ]
 
 def aggregate_bboxes(bboxes):
-    new_bboxes = []
+    # Finding overlapping pairs, find unions
+    # left, bottom, right, top
+
+    # overlapping pairs
+    overlapping = {}
+    overlapping_boxes = set()
+    for i in range(len(bboxes) - 1):
+        for j in range(i + 1, len(bboxes)):
+            if is_overlapped(bboxes[i], bboxes[j], x_tol = 5):
+                overlapping_boxes.add(i)
+                overlapping_boxes.add(j)
+                if i in overlapping:
+                    overlapping[i].append(j)
+                else:
+                    overlapping[i] = [j]
+
+    single_boxes = set(range(len(bboxes))) - overlapping_boxes
+
+    # union of pairs
+    for h in range(len(overlapping)):
+        old_size = 0
+        while old_size != len(overlapping[h]):
+            n = old_size
+            old_size = len(overlapping[h])
+            for k in range(n, len(overlapping[h])):
+                if overlapping[h][k] in overlapping:
+                    overlapping[h].extend(overlapping[overlapping[h][k]])
+                    overlapping[overlapping[h][k]] = []
+
+    # dereference indices and combine into 1 list
+    new_bboxes = [bboxes[i] for i in single_boxes]
+    for g in overlapping:
+        if overlapping[g]:
+            bbox = combine_n_bboxes([bboxes[i] for i in overlapping[g]])
+            new_bboxes.append(bbox)
+    return new_bboxes
+
+def aggregate_bboxes_v2(bboxes):
     i = 0
     while i < len(bboxes):
         bbox = bboxes.pop(i)
-        for j in range(len(bboxes), -1, -1):
-            if is_overlapped(bbox, bboxes[j], x_tol = 2):
+        for j in range(len(bboxes) - 1, -1, -1):
+            if is_overlapped(bbox, bboxes[j], x_tol = 10):
                 bbox = combine_bboxes(bbox, bboxes.pop(j))
-                if j < i:
+                if j <= i:
                     i = i - 1
 
-        new_bboxes.append(bbox)
         bboxes.insert(0, bbox)
         i = i + 1
 
-    return new_bboxes
-
+    return bboxes
 
 def main():
     if len(sys.argv) < 2:
@@ -146,7 +136,7 @@ def main():
             shapes.append(normalize_bbox(shape.get_bbox(), size))
 
         print('%d text segments' % len(texts))
-        lines = aggregate_bboxes(texts, size)
+        lines = aggregate_bboxes(texts)
         print('%d lines of text' % len(lines))
 
         draw_boxes(img_pages[i], shapes, color='yellow')
