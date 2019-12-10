@@ -47,7 +47,7 @@ def aggregate_bboxes(bboxes):
     overlapping_boxes = set()
     for i in range(len(bboxes) - 1):
         for j in range(i + 1, len(bboxes)):
-            if is_overlapped(bboxes[i], bboxes[j], x_tol=20, y_tol=20):
+            if is_overlapped(bboxes[i], bboxes[j], x_tol=5, y_tol=5):
                 overlapping_boxes.add(i)
                 overlapping_boxes.add(j)
                 if i in overlapping:

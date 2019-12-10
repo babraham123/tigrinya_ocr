@@ -1,26 +1,40 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# Tests for the bounding box logic.
+
+import unittest
 from detect_boxes import *
 
-def main():
-  b1 = [1, 1, 4, 2]
-  b2 = [1, 1, 2, 4]
-  b3 = [3, 3, 4, 4]
-  if not is_overlapped(b1, b2):
-    print('b1 and b2 should overlap')
+class TestBoxAggregation(unittest.TestCase):
+    def setUp(self):
+        self.b1 = [1, 1, 4, 2]
+        self.b2 = [1, 1, 2, 4]
+        self.b3 = [3, 3, 4, 4]
+        self.b4 = [10, 1, 12, 2]
 
-  if is_overlapped(b1, b3):
-    print('b1 and b3 should not overlap')
+    def test_is_overlapped(self):
+        self.assertTrue(is_overlapped(self.b1, self.b2))
+        self.assertFalse(is_overlapped(self.b1, self.b3))
+        self.assertFalse(is_overlapped(self.b2, self.b3))
 
-  if is_overlapped(b2, b3):
-    print('b2 and b3 should not overlap')
+    def test_is_overlapped_border(self):
+        self.assertTrue(is_overlapped(self.b1, self.b2, x_tol=1, y_tol=1))
+        self.assertFalse(is_overlapped(self.b1, self.b3, x_tol=1, y_tol=0))
+        self.assertFalse(is_overlapped(self.b2, self.b3, x_tol=0, y_tol=1))
+ 
+    def test_combine(self):
+        bb = combine_n_bboxes([self.b1, self.b2])
+        self.assertEqual(bb, [1, 1, 4, 4])
+        self.assertTrue(is_overlapped(self.b3, bb))
+        self.assertTrue(is_overlapped(self.b4, bb))
 
-  b4 = combine_n_bboxes([b1, b2])
-  print(b4)
-  if not is_overlapped(b3, b4):
-    print('b3 and b4 should overlap')
+    def test_aggregate(self):
+        # tol = 5
+        bbs = aggregate_bboxes([self.b1, self.b2, self.b3, self.b4])
+        self.assertEqual(bbs[0], self.b4)
+        self.assertEqual(bbs[1], [1, 1, 4, 4])
+        self.assertEqual(len(bbs), 2)
 
 if __name__ == '__main__':
-    main()
-
+    unittest.main()
