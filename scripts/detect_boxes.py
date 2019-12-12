@@ -19,13 +19,14 @@ def_res = 72
 
 def normalize_bbox(bbox, size):
     # left, bottom, right, top
+    # origin is in the upper left corner
     # width, height
     return [bbox[0]*multiplier, (size[1] - bbox[1])*multiplier, bbox[2]*multiplier, (size[1] - bbox[3])*multiplier]
 
 def is_overlapped(box_a, box_b, x_tol=0, y_tol=0):
     # box = [x1, y1, x2, y2]
-    box_a = [box_a[0] - x_tol, box_a[1] - y_tol, box_a[2] + x_tol, box_a[3] + y_tol]
-    return box_a[2] >= box_b[0] and box_b[2] >= box_a[0] and box_a[3] >= box_b[1] and box_b[3] >= box_a[1]
+    box_a = [box_a[0] - x_tol, box_a[1] + y_tol, box_a[2] + x_tol, box_a[3] - y_tol]
+    return box_a[2] >= box_b[0] and box_a[0] <= box_b[2] and box_a[3] <= box_b[1] and box_a[1] >= box_b[3]
 
 def combine_bboxes(box_a, box_b):
     return [min(box_a[0], box_b[0]), min(box_a[1], box_b[1]), max(box_a[2], box_b[2]), max(box_a[3], box_b[3])]
