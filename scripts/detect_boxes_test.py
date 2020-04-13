@@ -32,7 +32,7 @@ class TestBoxAggregation(unittest.TestCase):
  
     def test_combine(self):
         bb = combine_n_bboxes([self.b1, self.b2])
-        expected = normalize_bbox([1, 11, 4, 8])
+        expected = normalize_bbox([1, 1, 4, 4], self.size)
         self.assertEqual(bb, expected)
         self.assertTrue(is_overlapped(self.b3, bb))
         self.assertFalse(is_overlapped(self.b4, bb))
@@ -41,7 +41,7 @@ class TestBoxAggregation(unittest.TestCase):
         # tol = 5
         bbs = aggregate_bboxes([self.b1, self.b2, self.b3, self.b4])
         self.assertEqual(bbs[0], self.b4)
-        expected = normalize_bbox([1, 11, 4, 8])
+        expected = normalize_bbox([1, 1, 12, 4], self.size)
         self.assertEqual(bbs[1], expected)
         self.assertEqual(len(bbs), 2)
 
