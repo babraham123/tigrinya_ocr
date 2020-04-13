@@ -95,22 +95,20 @@ def aggregate_bboxes_v2(bboxes):
 
 def main():
     if len(sys.argv) < 2:
-        print('Incorrect arguments!')
-        exit()
+        print('Incorrect # of arguments!')
+        exit(1)
     pdf_name = sys.argv[1]
     if len(sys.argv) < 3:
         output_dir = '.'
     else:
         output_dir = sys.argv[2]
-    
     if not os.path.exists(pdf_name) or not os.path.exists(output_dir):
-        print('File/dir do not exist!')
-        exit()
-
+        print('File/dir does not exist!')
+        exit(1)
     (path, ext) = os.path.splitext(pdf_name)
     if ext.lower() != '.pdf':
         print('File is not a pdf!')
-        exit()
+        exit(1)
 
     img_pages = pdf_to_png(pdf_name, output_path=output_dir, resolution=def_res*multiplier)
     print('Converted to png.')
@@ -138,13 +136,14 @@ def main():
             shapes.append(normalize_bbox(shape.get_bbox(), size))
 
         print('%d text segments' % len(texts))
-        lines = aggregate_bboxes(texts)
-        print('%d lines of text' % len(lines))
+        # lines = aggregate_bboxes(texts)
+        # print('%d lines of text' % len(lines))
 
         draw_boxes(img_pages[i], shapes, color='yellow')
         draw_boxes(img_pages[i], images, color='green')
-        draw_boxes(img_pages[i], lines, color='red')
+        draw_boxes(img_pages[i], texts[0:10], color='red')
         print('Drew mined boxes for page %d.' % i)
+        print(texts[0:10])
     
     print(fonts.keys())
     print('Done!')
