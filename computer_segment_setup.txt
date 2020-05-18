@@ -20,6 +20,27 @@ cd ..
 sudo apt-get update
 sudo apt-get install libreoffice
 
+sudo apt-get install libmagickwand-dev imagemagick python-wand
+pip install minecart --user
+convert -version
+python -mwand.version
+ldconfig -p | grep -i wand
+export MAGICK_HOME='/usr/lib/x86_64-linux-gnu'
+export WAND_MAGICK_LIBRARY_SUFFIX='-6.Q16'
+
+# Loosen limits and enable ghostwriter scripts
+sudo vi /etc/ImageMagick-6/policy.xml
+- limits
+  <policy domain="resource" name="memory" value="2GiB"/>
+  <policy domain="resource" name="map" value="4GiB"/>
+  <policy domain="resource" name="width" value="128KP"/>
+  <policy domain="resource" name="height" value="128KP"/>
+  <policy domain="resource" name="area" value="1.0737GB"/>
+  <policy domain="resource" name="disk" value="16GiB"/>
+- for all coder policies
+  <policy domain="coder" rights="read|write" pattern="PDF" />
+
+# Assemble training data
 mkdir train
 mkdir eval
 mkdir data
@@ -32,7 +53,10 @@ gdrive download --recursive <folder_id>
 # generate corpus pdf (python2.7)
 mkdir generated
 cd ..
-python ../tigrinya_ocr/scripts/create_pdf.py ../kraken/corpus/full_corpus.txt data/generated/corpus.pdf /dev/null
+python ~/tigrinya_ocr/scripts/create_pdf.py ~/kraken/corpus/full_corpus.txt data/generated/corpus.pdf /dev/null
+
+# Extract text boxes from pdfs
+python ~/tigrinya_ocr/scripts/detect_boxes.py ~/tigrinya_ocr/raw_data/Tigrigna-Grammar-i-vs-e.pdf ~/segment/generated
 
 # convert
 mkdir images
