@@ -119,6 +119,7 @@ def main():
     fonts = {}
     for i, page in enumerate(doc.iter_pages()):
         size = [page.width, page.height]
+        print('Page size %s' % str(size))
         images = []
         shapes = []
         texts = []
@@ -130,6 +131,8 @@ def main():
         for text in page.letterings:
             fonts[text.font] = 1
             texts.append(normalize_bbox(text.get_bbox(), size))
+            texts_raw = text.get_bbox()
+        print(texts_raw[0:10])
 
         for shape in page.shapes:
             # shape.path -> segments
