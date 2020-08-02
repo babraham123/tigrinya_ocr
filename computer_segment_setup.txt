@@ -22,6 +22,12 @@ sudo apt-get install libreoffice
 
 sudo apt-get install libmagickwand-dev imagemagick python-wand
 pip install minecart --user
+pip uninstall pdfminer.six
+pip install pdfminer
+rm -rf ~/tigrinya_ocr/scripts/*.pyc ~/tigrinya_ocr/scripts/__pycache__
+vi ~/.local/lib/python3.6/site-packages/minecart/miner.py +330
+  pdfparser --> pdfdocument
+
 convert -version
 python -mwand.version
 ldconfig -p | grep -i wand
