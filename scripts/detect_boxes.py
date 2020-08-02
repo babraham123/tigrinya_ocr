@@ -147,7 +147,10 @@ def main():
         draw_boxes(img_pages[i], texts[0:10], color='red')
         print('Drew mined boxes for page %d.' % i)
         print(texts[0:10])
-    
+
+        # remove when done debugging
+        break
+
     print(fonts.keys())
     print('Done!')
 
