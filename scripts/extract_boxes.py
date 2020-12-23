@@ -1,16 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# python script to detect text blocks in pdfs
-# pip install pdfminer.six
-# example:
-#  python ./detect_boxes.py source.pdf output_dir
-#
-#  python ~/tigrinya_ocr/scripts/detect_boxes.py
-#           ~/tigrinya_ocr/raw_data/Tigrigna-Grammar-i-vs-e.pdf
-#           ~/segment/generated
+# Extract text boxes from a pdf file, then plot them.
 
-from graphics import *
+# python3 -m venv ~/pdf-env
+# source ~/pdf-env/bin/activate
+# pip install pdfminer.six
+#
+# ./extract_boxes.py source.pdf source.png [display_page_#]
+
 import os.path
 import sys
 
@@ -22,15 +20,13 @@ from pdfminer.pdfinterp import PDFPageInterpreter
 from pdfminer.pdfdevice import PDFDevice
 from pdfminer.layout import LAParams
 from pdfminer.converter import PDFPageAggregator
+import pdfminer
 
-_pdf_resolution = 72
-_png_resolution = 288
-_min_separation = 7
-_text_boxes = []
-
-multiplier = 4
-# minecart's native dpi is 72 for all coordinates
-def_res = 72
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import matplotlib.image
+from PIL import Image
+import numpy as np
 
 _pdf_resolution = 72
 _png_resolution = 288
@@ -62,7 +58,12 @@ def combine_boxes(boxes):
                 if (boxes[i][0] - _min_separation) <= boxes[j][2] and (boxes[i][2] + _min_separation) >= boxes[j][0]:
                     msg = 'h'
                     combine = True
-
+            elif ((boxes[i][0] <= boxes[j][0] and boxes[i][1] <= boxes[j][1] and boxes[i][2] >= boxes[j][2] and boxes[i][3] >= boxes[j][3]) or
+                  (boxes[j][0] <= boxes[i][0] and boxes[j][1] <= boxes[i][1] and boxes[j][2] >= boxes[i][2] and boxes[j][3] >= boxes[i][3])):
+                # internal overlap
+                msg = 'i'
+                combine = True
+            
             if combine:
                 # print(msg, str(boxes[i]), '|', str(boxes[j]))
                 boxes[i] = combine_box(boxes[i], boxes[j])
@@ -72,7 +73,7 @@ def combine_boxes(boxes):
             j = j + 1
         i = i + 1
         j = i + 1
-
+    
     print(num_b, '->', len(boxes), 'boxes,', num_b - len(boxes), 'combined')
     return boxes
 
@@ -99,6 +100,9 @@ def parse_obj(lt_objs):
             parse_obj(obj._objs)
 
 def parse_document(filename):
+    '''Returns a ist of boxes, by page. [pg0, pg1...], pg0 = [box0, box1, ...]
+    box = [x0, y0, x1, y1], the bottom left and upper right corners
+    '''
     global _text_boxes
 
     fp = open(filename, 'rb')
@@ -122,7 +126,7 @@ def parse_document(filename):
         _text_boxes = []
         interpreter.process_page(page)
         layout = device.get_result()
-        print('Page: ' + str(page.mediabox) + ' | ' + str(page.cropbox))
+        # print('Page: ' + str(page.mediabox) + ' | ' + str(page.cropbox))
         page_size = page.mediabox
         parse_obj(layout._objs)
 
@@ -130,83 +134,46 @@ def parse_document(filename):
         # page_boxes = [[100, 100, 500, 500], [200, 600, 400, 800], [501, 100, 901, 501], [200, 805, 400, 905]]
         page_boxes = combine_boxes(page_boxes)
         page_boxes = convert_boxes(page_size, page_boxes)
-        boxes.extend(page_boxes)
+        boxes.append(page_boxes)
 
     _text_boxes = []
     return boxes
 
-def draw_boxes(filename, boxes):
+def draw_boxes(filename, page_boxes):
     img = matplotlib.image.imread(filename)
     figure, ax = plt.subplots(1)
     ax.imshow(img)
-    for box in boxes:
+    for box in page_boxes:
         # zero is upper left
         # xy, width, -height (y inverted), angle
         rect = patches.Rectangle((box[0], box[1]), box[2] - box[0], box[3] - box[1], 0.0, edgecolor='r', facecolor="none")
         ax.add_patch(rect)
     plt.show()
 
+
 def main():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print('Incorrect # of arguments!')
         exit(1)
     pdf_name = sys.argv[1]
-    if len(sys.argv) < 3:
-        output_dir = '.'
-    else:
-        output_dir = sys.argv[2]
-    if not os.path.exists(pdf_name) or not os.path.exists(output_dir):
-        print('File/dir does not exist!')
+    png_name = sys.argv[2]
+    if not os.path.exists(pdf_name) or not os.path.exists(png_name):
+        print('File(s) do not exist!')
         exit(1)
     (path, ext) = os.path.splitext(pdf_name)
     if ext.lower() != '.pdf':
         print('File is not a pdf!')
         exit(1)
 
-    img_pages = pdf_to_png(pdf_name, output_path=output_dir, resolution=def_res*multiplier)
-    print('Converted to png.')
+    if len(sys.argv) < 4:
+        page_num = 0
+    else:
+        page_num = int(sys.argv[3]) - 1
 
-    pdf_file = open(pdf_name, 'rb')
-    doc = minecart.Document(pdf_file)
-    # page = doc.get_page(0)
-    fonts = {}
-    for i, page in enumerate(doc.iter_pages()):
-        size = [page.width, page.height]
-        print('Page size %s' % str(size))
-        images = []
-        shapes = []
-        texts = []
+    boxes = parse_document(pdf_name)
+    draw_boxes(png_name, boxes[page_num])
 
-        for image in page.images:
-            # im = image.as_pil()  # requires pillow
-            images.append(normalize_bbox(image.get_bbox(), size))
-
-        for text in page.letterings:
-            fonts[text.font] = 1
-            texts.append(normalize_bbox(text.get_bbox(), size))
-            texts_raw = text.get_bbox()
-        print(texts_raw[0:10])
-
-        for shape in page.shapes:
-            # shape.path -> segments
-            shapes.append(normalize_bbox(shape.get_bbox(), size))
-
-        print('%d text segments' % len(texts))
-        # lines = aggregate_bboxes(texts)
-        # print('%d lines of text' % len(lines))
-
-        draw_boxes(img_pages[i], shapes, color='yellow')
-        draw_boxes(img_pages[i], images, color='green')
-        draw_boxes(img_pages[i], texts[0:10], color='red')
-        print('Drew mined boxes for page %d.' % i)
-        print(texts[0:10])
-
-        # remove when done debugging
-        break
-
-    print(fonts.keys())
     print('Done!')
-
 
 if __name__ == '__main__':
     main()
