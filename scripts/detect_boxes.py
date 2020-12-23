@@ -2,96 +2,149 @@
 # -*- coding: utf-8 -*-
 
 # python script to detect text blocks in pdfs
-# pip install minecart --user
+# pip install pdfminer.six
 # example:
-#  python ~/tigrinya_ocr/scripts/detect_boxes.py source.pdf output_dir
-#    ~/tigrinya_ocr/raw_data/Tigrigna-Grammar-i-vs-e.pdf
-#    ~/segment/generated
+#  python ./detect_boxes.py source.pdf output_dir
+#
+#  python ~/tigrinya_ocr/scripts/detect_boxes.py
+#           ~/tigrinya_ocr/raw_data/Tigrigna-Grammar-i-vs-e.pdf
+#           ~/segment/generated
 
 from graphics import *
-import minecart
 import os.path
 import sys
+
+from pdfminer.pdfparser import PDFParser
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfinterp import PDFResourceManager
+from pdfminer.pdfinterp import PDFPageInterpreter
+from pdfminer.pdfdevice import PDFDevice
+from pdfminer.layout import LAParams
+from pdfminer.converter import PDFPageAggregator
+
+_pdf_resolution = 72
+_png_resolution = 288
+_min_separation = 7
+_text_boxes = []
 
 multiplier = 4
 # minecart's native dpi is 72 for all coordinates
 def_res = 72
 
-def normalize_bbox(bbox, size):
-    # left, bottom, right, top
-    # origin is in the upper left corner
-    # width, height
-    return [bbox[0]*multiplier, (size[1] - bbox[1])*multiplier, bbox[2]*multiplier, (size[1] - bbox[3])*multiplier]
+_pdf_resolution = 72
+_png_resolution = 288
+_min_separation = 7
+_text_boxes = []
 
-def is_overlapped(box_a, box_b, x_tol=0, y_tol=0):
-    # box = [x1, y1, x2, y2]
-    box_a = [box_a[0] - x_tol, box_a[1] + y_tol, box_a[2] + x_tol, box_a[3] - y_tol]
-    return box_a[2] >= box_b[0] and box_a[0] <= box_b[2] and box_a[3] <= box_b[1] and box_a[1] >= box_b[3]
+def combine_box(box0, box1):
+    return [min(box0[0], box1[0]), min(box0[1], box1[1]), max(box0[2], box1[2]), max(box0[3], box1[3])]
 
-def combine_bboxes(box_a, box_b):
-    return [min(box_a[0], box_b[0]), min(box_a[1], box_b[1]), max(box_a[2], box_b[2]), max(box_a[3], box_b[3])]
-
-def combine_n_bboxes(bboxes):
-    return [
-        min(bboxes, key=lambda b: b[0])[0],
-        min(bboxes, key=lambda b: b[1])[1],
-        max(bboxes, key=lambda b: b[2])[2],
-        max(bboxes, key=lambda b: b[3])[3]
-    ]
-
-def aggregate_bboxes(bboxes):
-    # Finding overlapping pairs, find unions
-    # left, bottom, right, top
-
-    # overlapping pairs
-    overlapping = {}
-    overlapping_boxes = set()
-    for i in range(len(bboxes) - 1):
-        for j in range(i + 1, len(bboxes)):
-            if is_overlapped(bboxes[i], bboxes[j], x_tol=5, y_tol=5):
-                overlapping_boxes.add(i)
-                overlapping_boxes.add(j)
-                if i in overlapping:
-                    overlapping[i].append(j)
-                else:
-                    overlapping[i] = [j]
-
-    single_boxes = set(range(len(bboxes))) - overlapping_boxes
-
-    # union of pairs
-    for h in range(len(overlapping)):
-        old_size = 0
-        while old_size != len(overlapping[h]):
-            n = old_size
-            old_size = len(overlapping[h])
-            for k in range(n, len(overlapping[h])):
-                if overlapping[h][k] in overlapping:
-                    overlapping[h].extend(overlapping[overlapping[h][k]])
-                    overlapping[overlapping[h][k]] = []
-
-    # dereference indices and combine into 1 list
-    new_bboxes = [bboxes[i] for i in single_boxes]
-    for g in overlapping:
-        if overlapping[g]:
-            indices = overlapping[g] + [g]
-            bbox = combine_n_bboxes([bboxes[i] for i in indices])
-            new_bboxes.append(bbox)
-    return new_bboxes
-
-def aggregate_bboxes_v2(bboxes):
+def combine_boxes(boxes):
+    # Loop thru every unique pairing, i != j
+    # check for close neighbors and overlaps.
+    # PDF coordinates, origin in lower left
     i = 0
-    while i < len(bboxes):
-        bbox = bboxes.pop(i)
-        for j in range(len(bboxes) - 1, -1, -1):
-            if is_overlapped(bbox, bboxes[j], x_tol = 10):
-                bbox = combine_bboxes(bbox, bboxes.pop(j))
-                if j <= i:
-                    i = i - 1
+    j = 1
+    num_b = len(boxes)
+    while i < len(boxes):
+        while j < len(boxes):
+            msg = ''
+            combine = False
+            # First check alignment
+            if abs(boxes[i][0] - boxes[j][0]) <= _min_separation and abs(boxes[i][2] - boxes[j][2]) <= _min_separation:
+                # vertical closeness / overlap
+                if (boxes[i][1] - _min_separation) <= boxes[j][3] and (boxes[i][3] + _min_separation) >= boxes[j][1]:
+                    msg = 'v'
+                    combine = True
+            elif abs(boxes[i][1] - boxes[j][1]) <= _min_separation and abs(boxes[i][3] - boxes[j][3]) <= _min_separation:
+                # horizontal closeness / overlap
+                if (boxes[i][0] - _min_separation) <= boxes[j][2] and (boxes[i][2] + _min_separation) >= boxes[j][0]:
+                    msg = 'h'
+                    combine = True
 
-        bboxes.insert(0, bbox)
+            if combine:
+                # print(msg, str(boxes[i]), '|', str(boxes[j]))
+                boxes[i] = combine_box(boxes[i], boxes[j])
+                del boxes[j]
+                j = i
+
+            j = j + 1
         i = i + 1
+        j = i + 1
 
-    return bboxes
+    print(num_b, '->', len(boxes), 'boxes,', num_b - len(boxes), 'combined')
+    return boxes
+
+def convert_boxes(page_size, boxes):
+    ret_boxes = []
+    multiplier = int(_png_resolution / _pdf_resolution)
+
+    for box in boxes:
+        # zero is lower left
+        # obj.bbox from parse_obj
+        box = [box[0], page_size[3] - box[1], box[2], page_size[3] - box[3]]
+        box = [b * multiplier for b in box]
+        ret_boxes.append(box)
+    return ret_boxes
+
+def parse_obj(lt_objs):
+    global _text_boxes
+    for obj in lt_objs:
+        if isinstance(obj, pdfminer.layout.LTTextBoxHorizontal):
+            # print('Box:' + str(obj.bbox) + '|' + str(bbox))
+            _text_boxes.append(obj.bbox)
+
+        elif isinstance(obj, pdfminer.layout.LTFigure):
+            parse_obj(obj._objs)
+
+def parse_document(filename):
+    global _text_boxes
+
+    fp = open(filename, 'rb')
+    parser = PDFParser(fp)
+    document = PDFDocument(parser)
+    if not document.is_extractable:
+        raise pdfminer.pdfpage.PDFTextExtractionNotAllowed
+
+    # Create a PDF resource manager object that stores shared resources.
+    rsrcmgr = PDFResourceManager()
+    device = PDFDevice(rsrcmgr)
+
+    # BEGIN LAYOUT ANALYSIS
+    laparams = LAParams()
+    device = PDFPageAggregator(rsrcmgr, laparams=laparams)
+    interpreter = PDFPageInterpreter(rsrcmgr, device)
+
+    # loop over all pages in the document
+    boxes = []
+    for page in PDFPage.create_pages(document):
+        _text_boxes = []
+        interpreter.process_page(page)
+        layout = device.get_result()
+        print('Page: ' + str(page.mediabox) + ' | ' + str(page.cropbox))
+        page_size = page.mediabox
+        parse_obj(layout._objs)
+
+        page_boxes = _text_boxes.copy()
+        # page_boxes = [[100, 100, 500, 500], [200, 600, 400, 800], [501, 100, 901, 501], [200, 805, 400, 905]]
+        page_boxes = combine_boxes(page_boxes)
+        page_boxes = convert_boxes(page_size, page_boxes)
+        boxes.extend(page_boxes)
+
+    _text_boxes = []
+    return boxes
+
+def draw_boxes(filename, boxes):
+    img = matplotlib.image.imread(filename)
+    figure, ax = plt.subplots(1)
+    ax.imshow(img)
+    for box in boxes:
+        # zero is upper left
+        # xy, width, -height (y inverted), angle
+        rect = patches.Rectangle((box[0], box[1]), box[2] - box[0], box[3] - box[1], 0.0, edgecolor='r', facecolor="none")
+        ax.add_patch(rect)
+    plt.show()
 
 def main():
     if len(sys.argv) < 2:
